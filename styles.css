@@ -1799,7 +1799,124 @@ body {
 }
 
 .benefits-list {
-    space-y: 1rem;
+    margin-top: 1rem;
+    & > * + * {
+        margin-top: 1rem;
+    }
+}
+
+/* Enhanced Header Styles */
+header {
+    position: relative;
+    backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, 
+        rgba(139, 69, 19, 0.1) 0%, 
+        rgba(168, 85, 247, 0.1) 50%, 
+        rgba(59, 130, 246, 0.1) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(168, 85, 247, 0.05) 50%, 
+        transparent 100%);
+    pointer-events: none;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+.container {
+    position: relative;
+    z-index: 2;
+}
+
+/* Logo Enhancement */
+header a[href="#home"] {
+    background: linear-gradient(135deg, #8B4513 0%, #A855F7 50%, #3B82F6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+header a[href="#home"]:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.5));
+}
+
+/* Navigation Links Enhancement */
+#menu a {
+    position: relative;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#menu a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.2));
+    border-radius: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+#menu a:hover::before {
+    opacity: 1;
+}
+
+#menu a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.3);
+    color: #ffffff;
+}
+
+/* Mobile Menu Button Enhancement */
+#menu-btn {
+    padding: 0.75rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+#menu-btn:hover {
+    background: rgba(168, 85, 247, 0.2);
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.3);
+}
+
+#menu-btn svg {
+    transition: all 0.3s ease;
+}
+
+#menu-btn:hover svg {
+    color: #ffffff;
+    filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.5));
 }
 
 .benefit-item {
