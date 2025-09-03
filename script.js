@@ -3,17 +3,19 @@ lucide.createIcons();
 
 // Menu Mobile Toggle
 const menuBtn = document.getElementById('menu-btn');
-const mobileMenu = document.getElementById('mobile-menu');
+const menu = document.getElementById('menu');
 
 menuBtn.addEventListener('click', () => {
-  mobileMenu.classList.toggle('hidden');
+  menu.classList.toggle('hidden');
+  menu.classList.toggle('show');
 });
 
 // Fechar menu mobile ao clicar em um link
-const mobileMenuLinks = mobileMenu.querySelectorAll('a');
-mobileMenuLinks.forEach(link => {
+const menuLinks = menu.querySelectorAll('a');
+menuLinks.forEach(link => {
   link.addEventListener('click', () => {
-    mobileMenu.classList.add('hidden');
+    menu.classList.add('hidden');
+    menu.classList.remove('show');
   });
 });
 

@@ -1919,6 +1919,59 @@ header a[href="#home"]:hover {
     filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.5));
 }
 
+/* Mobile Responsive Fixes */
+@media (max-width: 768px) {
+    header {
+        padding: 0.5rem 0;
+    }
+    
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    header a[href="#home"] {
+        font-size: 1.5rem;
+    }
+    
+    #menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        margin: 0;
+        flex-direction: column;
+        gap: 0.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    #menu.hidden {
+        display: none;
+    }
+    
+    #menu.show {
+        display: flex;
+    }
+    
+    #menu a {
+        width: 100%;
+        text-align: center;
+        padding: 1rem;
+        margin: 0;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    #menu-btn {
+        display: block;
+        padding: 0.5rem;
+    }
+}
+
 .benefit-item {
     display: flex;
     align-items: center;
