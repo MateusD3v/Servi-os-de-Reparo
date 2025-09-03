@@ -13,14 +13,10 @@
   <!-- Header -->
   <header class="bg-gradient-to-r from-purple-800 via-blue-700 to-indigo-800 shadow-lg sticky top-0 z-50">
     <div class="container mx-auto flex justify-between items-center px-6 py-2">
-      <a href="#home" class="text-2xl font-extrabold bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent hover:from-cyan-200 hover:to-blue-300 transition">ReparaFácil</a>
+      <a href="#home" class="text-2xl font-extrabold text-orange-400 hover:text-orange-300 transition">ReparaFácil</a>
       <nav>
         <button id="menu-btn" aria-label="Abrir menu" class="md:hidden focus:outline-none">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" >
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
+          <i data-lucide="menu" class="w-6 h-6"></i>
         </button>
         <ul id="menu" class="md:flex md:space-x-8 text-lg font-medium hidden">
           <li><a href="#home" class="block py-2 px-3 text-white hover:text-yellow-300 transition">Início</a></li>
@@ -32,13 +28,38 @@
       </nav>
     </div>
     <!-- Mobile menu -->
-    <div id="mobile-menu" class="md:hidden hidden bg-gradient-to-r from-purple-900 to-indigo-900 shadow-lg">
-      <ul class="flex flex-col space-y-2 p-4 text-lg font-medium">
-        <li><a href="#home" class="block py-2 px-3 text-white hover:text-yellow-300 transition">Início</a></li>
-        <li><a href="#services" class="block py-2 px-3 text-white hover:text-yellow-300 transition">Serviços</a></li>
-        <li><a href="#register" class="block py-2 px-3 text-white hover:text-yellow-300 transition">Cadastrar</a></li>
-        <li><a href="#about" class="block py-2 px-3 text-white hover:text-yellow-300 transition">Sobre</a></li>
-        <li><a href="#faq" class="block py-2 px-3 text-white hover:text-yellow-300 transition">FAQ</a></li>
+    <div id="mobile-menu" class="md:hidden hidden mobile-menu-enhanced">
+      <ul class="mobile-menu-list">
+        <li class="mobile-menu-item">
+          <a href="#home" class="mobile-menu-link">
+            <i data-lucide="home" class="mobile-menu-icon"></i>
+            <span>Início</span>
+          </a>
+        </li>
+        <li class="mobile-menu-item">
+          <a href="#services" class="mobile-menu-link">
+            <i data-lucide="wrench" class="mobile-menu-icon"></i>
+            <span>Serviços</span>
+          </a>
+        </li>
+        <li class="mobile-menu-item">
+          <a href="#register" class="mobile-menu-link">
+            <i data-lucide="user-plus" class="mobile-menu-icon"></i>
+            <span>Cadastrar</span>
+          </a>
+        </li>
+        <li class="mobile-menu-item">
+          <a href="#about" class="mobile-menu-link">
+            <i data-lucide="info" class="mobile-menu-icon"></i>
+            <span>Sobre</span>
+          </a>
+        </li>
+        <li class="mobile-menu-item">
+          <a href="#faq" class="mobile-menu-link">
+            <i data-lucide="help-circle" class="mobile-menu-icon"></i>
+            <span>FAQ</span>
+          </a>
+        </li>
       </ul>
     </div>
   </header>
@@ -65,8 +86,8 @@
     </div>
     
     <div class="hero-content relative z-10">
-      <div class="hero-badge mb-6">
-        <span class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium border border-white/30">
+      <div class="hero-badge mb-6 mt-8">
+        <span class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium border border-white/30 mt-4">
           ✨ Plataforma #1 em Serviços Residenciais
         </span>
       </div>
@@ -96,10 +117,10 @@
         </a>
       </div>
       
-      <div class="hero-stats mt-12 grid grid-cols-3 gap-8 max-w-md mx-auto">
+      <div class="hero-stats mt-12 grid grid-cols-3 gap-4 sm:gap-8 max-w-lg mx-auto">
         <div class="text-center">
           <div class="text-2xl font-bold text-yellow-300">500+</div>
-          <div class="text-sm opacity-80">Profissionais</div>
+          <div class="text-xs opacity-80">Profissionais</div>
         </div>
         <div class="text-center">
           <div class="text-2xl font-bold text-yellow-300">10k+</div>
@@ -953,6 +974,11 @@
       </div>
     </div>
   </footer>
+
+  <!-- Back to Top Button -->
+  <button id="backToTop" class="back-to-top" aria-label="Voltar ao topo">
+    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+  </button>
 
   <script src="script.js"></script>
 </body>

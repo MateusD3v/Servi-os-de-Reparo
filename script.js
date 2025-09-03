@@ -3,19 +3,17 @@ lucide.createIcons();
 
 // Menu Mobile Toggle
 const menuBtn = document.getElementById('menu-btn');
-const menu = document.getElementById('menu');
+const mobileMenu = document.getElementById('mobile-menu');
 
 menuBtn.addEventListener('click', () => {
-  menu.classList.toggle('hidden');
-  menu.classList.toggle('show');
+  mobileMenu.classList.toggle('hidden');
 });
 
 // Fechar menu mobile ao clicar em um link
-const menuLinks = menu.querySelectorAll('a');
-menuLinks.forEach(link => {
+const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+mobileMenuLinks.forEach(link => {
   link.addEventListener('click', () => {
-    menu.classList.add('hidden');
-    menu.classList.remove('show');
+    mobileMenu.classList.add('hidden');
   });
 });
 
@@ -38,17 +36,17 @@ const faqQuestions = document.querySelectorAll('.faq-question');
 
 faqQuestions.forEach(question => {
   question.addEventListener('click', () => {
-    const answer = question.nextElementSibling;
+    const faqItem = question.parentElement;
     const icon = question.querySelector('.faq-icon');
     const isExpanded = question.getAttribute('aria-expanded') === 'true';
     
     // Fechar todas as outras perguntas
     faqQuestions.forEach(otherQuestion => {
       if (otherQuestion !== question) {
-        const otherAnswer = otherQuestion.nextElementSibling;
+        const otherFaqItem = otherQuestion.parentElement;
         const otherIcon = otherQuestion.querySelector('.faq-icon');
         otherQuestion.setAttribute('aria-expanded', 'false');
-        otherAnswer.classList.add('hidden');
+        otherFaqItem.classList.remove('active');
         otherIcon.style.transform = 'rotate(0deg)';
       }
     });
@@ -56,11 +54,11 @@ faqQuestions.forEach(question => {
     // Toggle da pergunta atual
     if (isExpanded) {
       question.setAttribute('aria-expanded', 'false');
-      answer.classList.add('hidden');
+      faqItem.classList.remove('active');
       icon.style.transform = 'rotate(0deg)';
     } else {
       question.setAttribute('aria-expanded', 'true');
-      answer.classList.remove('hidden');
+      faqItem.classList.add('active');
       icon.style.transform = 'rotate(180deg)';
     }
   });
@@ -172,4 +170,24 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.fade-in').forEach(el => {
   el.style.animationPlayState = 'paused';
   observer.observe(el);
+});
+
+// Back to Top Button Functionality
+const backToTopBtn = document.getElementById('backToTop');
+
+// Show/hide button based on scroll position
+window.addEventListener('scroll', () => {
+  if (window.pageYOffset > 300) {
+    backToTopBtn.classList.add('show');
+  } else {
+    backToTopBtn.classList.remove('show');
+  }
+});
+
+// Smooth scroll to top when button is clicked
+backToTopBtn.addEventListener('click', () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
 });
