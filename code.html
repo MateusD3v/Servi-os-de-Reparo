@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ReparaFácil - Sua casa em boas mãos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-white shadow sticky top-0 z-50">
+    <div class="container mx-auto flex justify-between items-center px-6 py-4">
+      <a href="#home" class="text-3xl font-extrabold text-purple-700 hover:text-purple-800 transition">ReparaFácil</a>
+      <nav>
+        <button id="menu-btn" aria-label="Abrir menu" class="md:hidden focus:outline-none">
+          <svg class="w-8 h-8 text-purple-700" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" >
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+        <ul id="menu" class="hidden md:flex md:space-x-8 text-lg font-medium">
+          <li><a href="#home" class="block py-2 px-3 hover:text-purple-700 transition">Início</a></li>
+          <li><a href="#services" class="block py-2 px-3 hover:text-purple-700 transition">Serviços</a></li>
+          <li><a href="#register" class="block py-2 px-3 hover:text-purple-700 transition">Cadastrar</a></li>
+          <li><a href="#about" class="block py-2 px-3 hover:text-purple-700 transition">Sobre</a></li>
+          <li><a href="#faq" class="block py-2 px-3 hover:text-purple-700 transition">FAQ</a></li>
+        </ul>
+      </nav>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="md:hidden hidden bg-white shadow-lg">
+      <ul class="flex flex-col space-y-2 p-4 text-lg font-medium">
+        <li><a href="#home" class="block py-2 px-3 hover:text-purple-700 transition">Início</a></li>
+        <li><a href="#services" class="block py-2 px-3 hover:text-purple-700 transition">Serviços</a></li>
+        <li><a href="#register" class="block py-2 px-3 hover:text-purple-700 transition">Cadastrar</a></li>
+        <li><a href="#about" class="block py-2 px-3 hover:text-purple-700 transition">Sobre</a></li>
+        <li><a href="#faq" class="block py-2 px-3 hover:text-purple-700 transition">FAQ</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="home" class="hero-bg min-h-[80vh] flex flex-col justify-center items-center px-6 text-center relative">
+    <!-- Floating particles -->
+    <div class="floating-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+    
+    <!-- Wave decoration -->
+    <div class="wave-decoration">
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="shape-fill"></path>
+        <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" class="shape-fill"></path>
+        <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" class="shape-fill"></path>
+      </svg>
+    </div>
+    
+    <div class="hero-content relative z-10">
+      <div class="hero-badge mb-6">
+        <span class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium border border-white/30">
+          ✨ Plataforma #1 em Serviços Residenciais
+        </span>
+      </div>
+      
+      <h1 class="text-4xl sm:text-6xl md:text-8xl font-black mb-6 leading-tight">
+        Repara<span class="text-yellow-400">Fácil</span>
+      </h1>
+      
+      <p class="text-xl sm:text-2xl md:text-3xl mb-4 font-bold max-w-2xl mx-auto">
+        Sua casa em <span class="text-yellow-300">boas mãos</span>
+      </p>
+      
+      <p class="max-w-4xl text-base sm:text-lg md:text-xl mb-12 leading-relaxed px-4 opacity-90">
+        Conectamos você aos <strong>melhores profissionais</strong> para serviços de manutenção residencial. 
+        Eletricistas, encanadores, pintores e muito mais, todos <strong>verificados e qualificados</strong>.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <a href="#register" class="cta-button group">
+          <span class="relative z-10">Comece Agora</span>
+          <i data-lucide="arrow-right" class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+        </a>
+        
+        <a href="#services" class="secondary-button">
+          <i data-lucide="play-circle" class="mr-2 w-5 h-5"></i>
+          Ver Serviços
+        </a>
+      </div>
+      
+      <div class="hero-stats mt-12 grid grid-cols-3 gap-8 max-w-md mx-auto">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-yellow-300">500+</div>
+          <div class="text-sm opacity-80">Profissionais</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-yellow-300">10k+</div>
+          <div class="text-sm opacity-80">Serviços</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-yellow-300">4.9★</div>
+          <div class="text-sm opacity-80">Avaliação</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="services-bg py-24 px-6 relative overflow-hidden">
+    <!-- Background decoration -->
+    <div class="services-decoration">
+      <div class="floating-shape shape-1"></div>
+      <div class="floating-shape shape-2"></div>
+      <div class="floating-shape shape-3"></div>
+    </div>
+    
+    <div class="max-w-6xl mx-auto relative z-10">
+      <div class="text-center mb-16">
+        <div class="inline-block bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm px-6 py-2 rounded-full border border-white/20 mb-6">
+          <span class="text-white font-medium">✨ Serviços Premium</span>
+        </div>
+        <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-6">
+          Nossos <span class="text-gradient">Serviços</span>
+        </h2>
+        <p class="text-xl text-white/90 max-w-3xl mx-auto">
+          Profissionais qualificados e verificados para todos os seus projetos residenciais
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="service-card group">
+          <div class="service-icon-wrapper">
+            <div class="service-icon bg-gradient-to-br from-yellow-400 to-orange-500">
+              <i data-lucide="zap" class="w-8 h-8 text-white"></i>
+            </div>
+            <div class="service-glow"></div>
+          </div>
+          <h3 class="text-2xl font-bold mb-4 text-white group-hover:text-yellow-300 transition-colors">Elétrica</h3>
+          <p class="text-white/80 mb-6 leading-relaxed">
+            Instalações, reparos e manutenção elétrica com <strong>segurança</strong> e <strong>qualidade garantida</strong>.
+          </p>
+          <div class="service-features">
+            <div class="feature-item">
+              <i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>
+              <span>Certificação CREA</span>
+            </div>
+            <div class="feature-item">
+              <i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>
+              <span>Garantia de 1 ano</span>
+            </div>
+            <div class="feature-item">
+              <i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>
+              <span>Atendimento 24h</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="service-card group">
+          <div class="service-icon-wrapper">
+            <div class="service-icon bg-gradient-to-br from-blue-400 to-cyan-500">
+              <i data-lucide="droplets" class="w-8 h-8 text-white"></i>
+            </div>
+            <div class="service-glow"></div>
+          </div>
+          <h3 class="text-2xl font-bold mb-4 text-white group-hover:text-blue-300 transition-colors">Hidráulica</h3>
+          <p class="text-white/80 mb-6 leading-relaxed">
+            Encanamento, vazamentos e instalação de sistemas hidráulicos com <strong>rapidez</strong> e <strong>eficiência</strong>.
+          </p>
+          <div class="service-features">
+            <div class="feature-item">
+              <i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>
+              <span>Materiais premium</span>
+            </div>
+            <div class="feature-item">
+              <i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>
+              <span>Sem vazamentos</span>
+            </div>
+            <div class="feature-item">
+              <i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>
+              <span>Orçamento grátis</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="service-card group">
+          <div class="service-icon-wrapper">
+            <div class="service-icon bg-gradient-to-br from-purple-400 to-pink-500">
+              <i data-lucide="paintbrush" class="w-8 h-8 text-white"></i>
+            </div>
+            <div class="service-glow"></div>
+          </div>
+          <h3 class="text-2xl font-bold mb-4 text-white group-hover:text-purple-300 transition-colors">Pintura</h3>
+          <p class="text-white/80 mb-6 leading-relaxed">
+            Pintura residencial e comercial com <strong>acabamento profissional</strong> e <strong>durabilidade</strong>.
+          </p>
+          <div class="service-features">
+            <div class="feature-item">
+              <i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>
+              <span>Tintas premium</span>
+            </div>
+            <div class="feature-item">
+              <i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>
+              <span>Acabamento perfeito</span>
+            </div>
+            <div class="feature-item">
+              <i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>
+              <span>Limpeza inclusa</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center mt-16">
+        <a href="#register" class="cta-button group">
+          <span class="relative z-10">Solicitar Orçamento</span>
+          <i data-lucide="calculator" class="ml-2 w-5 h-5 group-hover:scale-110 transition-transform"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ratings Section -->
+  <section id="ratings" class="ratings-bg py-24 px-6 relative overflow-hidden">
+    <!-- Background decoration -->
+    <div class="ratings-decoration">
+      <div class="testimonial-shape shape-1"></div>
+      <div class="testimonial-shape shape-2"></div>
+      <div class="testimonial-shape shape-3"></div>
+      <div class="testimonial-shape shape-4"></div>
+    </div>
+    
+    <div class="max-w-6xl mx-auto relative z-10">
+      <div class="text-center mb-16">
+        <div class="inline-block bg-gradient-to-r from-green-600/20 to-emerald-600/20 backdrop-blur-sm px-6 py-2 rounded-full border border-white/20 mb-6">
+          <span class="text-white font-medium">⭐ Avaliações Reais</span>
+        </div>
+        <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-6">
+          O que nossos <span class="text-gradient">clientes</span> dizem
+        </h2>
+        <p class="text-xl text-white/90 max-w-3xl mx-auto">
+          Mais de <strong>10.000 clientes satisfeitos</strong> confiam em nossos profissionais
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="testimonial-card group">
+          <div class="testimonial-header">
+            <div class="stars-wrapper">
+              <div class="flex text-yellow-400 mb-1">
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+              </div>
+              <div class="text-sm text-yellow-300 font-medium">5.0 • Verificado</div>
+            </div>
+            <div class="quote-icon">
+              <i data-lucide="quote" class="w-8 h-8 text-white/30"></i>
+            </div>
+          </div>
+          
+          <p class="testimonial-text">
+            "<strong>Serviço rápido e profissional!</strong> O eletricista chegou no horário marcado e resolveu o problema da minha casa rapidamente. <em>Recomendo muito!</em>"
+          </p>
+          
+          <div class="testimonial-author">
+            <div class="author-avatar bg-gradient-to-br from-purple-500 to-pink-500">
+              <span class="text-white font-bold text-lg">J</span>
+            </div>
+            <div class="author-info">
+              <h4 class="author-name">João Silva</h4>
+              <p class="author-location">
+                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                São Paulo, SP
+              </p>
+              <div class="service-badge">
+                <i data-lucide="zap" class="w-3 h-3"></i>
+                <span>Elétrica</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card group">
+          <div class="testimonial-header">
+            <div class="stars-wrapper">
+              <div class="flex text-yellow-400 mb-1">
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                <i data-lucide="star" class="w-5 h-5 text-gray-400"></i>
+              </div>
+              <div class="text-sm text-yellow-300 font-medium">4.0 • Verificado</div>
+            </div>
+            <div class="quote-icon">
+              <i data-lucide="quote" class="w-8 h-8 text-white/30"></i>
+            </div>
+          </div>
+          
+          <p class="testimonial-text">
+            "<strong>Muito prático para emergências em casa.</strong> O aplicativo é fácil de usar e os profissionais são <em>confiáveis e pontuais</em>."
+          </p>
+          
+          <div class="testimonial-author">
+            <div class="author-avatar bg-gradient-to-br from-blue-500 to-cyan-500">
+              <span class="text-white font-bold text-lg">M</span>
+            </div>
+            <div class="author-info">
+              <h4 class="author-name">Maria Souza</h4>
+              <p class="author-location">
+                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                Rio de Janeiro, RJ
+              </p>
+              <div class="service-badge">
+                <i data-lucide="droplets" class="w-3 h-3"></i>
+                <span>Hidráulica</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card group">
+          <div class="testimonial-header">
+            <div class="stars-wrapper">
+              <div class="flex text-yellow-400 mb-1">
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+              </div>
+              <div class="text-sm text-yellow-300 font-medium">5.0 • Verificado</div>
+            </div>
+            <div class="quote-icon">
+              <i data-lucide="quote" class="w-8 h-8 text-white/30"></i>
+            </div>
+          </div>
+          
+          <p class="testimonial-text">
+            "<strong>Excelente qualidade!</strong> A pintura ficou perfeita e o preço foi muito justo. <em>Superou todas as minhas expectativas!</em>"
+          </p>
+          
+          <div class="testimonial-author">
+            <div class="author-avatar bg-gradient-to-br from-emerald-500 to-teal-500">
+              <span class="text-white font-bold text-lg">A</span>
+            </div>
+            <div class="author-info">
+              <h4 class="author-name">Ana Costa</h4>
+              <p class="author-location">
+                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                Belo Horizonte, MG
+              </p>
+              <div class="service-badge">
+                <i data-lucide="paintbrush" class="w-3 h-3"></i>
+                <span>Pintura</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center mt-16">
+        <div class="inline-flex items-center gap-8 bg-white/10 backdrop-blur-sm px-8 py-4 rounded-2xl border border-white/20">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-yellow-300">4.9/5</div>
+            <div class="text-sm text-white/80">Avaliação Média</div>
+          </div>
+          <div class="w-px h-12 bg-white/20"></div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-green-300">98%</div>
+            <div class="text-sm text-white/80">Satisfação</div>
+          </div>
+          <div class="w-px h-12 bg-white/20"></div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-blue-300">10k+</div>
+            <div class="text-sm text-white/80">Avaliações</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Registration Section -->
+  <section id="register" class="py-20 register-bg relative">
+    <!-- Background Decorations -->
+    <div class="register-decoration">
+      <div class="register-shape shape-1"></div>
+      <div class="register-shape shape-2"></div>
+      <div class="register-shape shape-3"></div>
+      <div class="register-shape shape-4"></div>
+      <div class="register-shape shape-5"></div>
+    </div>
+    
+    <div class="container mx-auto px-6 relative z-10">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-16">
+          <div class="inline-flex items-center gap-2 bg-gradient-to-r from-green-500/20 to-blue-500/20 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6">
+            <i data-lucide="user-plus" class="w-4 h-4 text-green-400"></i>
+            <span class="text-sm font-medium text-white/90">Junte-se à Nossa Rede</span>
+          </div>
+          <h2 class="text-5xl md:text-6xl font-bold mb-6">
+            <span class="bg-gradient-to-r from-white via-green-200 to-blue-200 bg-clip-text text-transparent">
+              Cadastre-se
+            </span>
+            <br>
+            <span class="bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Agora
+            </span>
+          </h2>
+          <p class="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
+            Transforme sua expertise em oportunidades. Conecte-se com milhares de clientes que precisam dos seus serviços.
+          </p>
+        </div>
+        
+        <div class="grid lg:grid-cols-2 gap-12 items-start">
+          <!-- Benefits Section -->
+          <div class="space-y-8">
+            <div class="register-benefit-card">
+              <div class="benefit-icon">
+                <i data-lucide="users" class="w-6 h-6"></i>
+              </div>
+              <div class="benefit-content">
+                <h3 class="text-xl font-bold text-white mb-2">Base de Clientes Crescente</h3>
+                <p class="text-white/80">Acesse milhares de clientes ativos em sua região procurando por seus serviços especializados.</p>
+                <div class="benefit-stats">
+                  <span class="stat-number">15k+</span>
+                  <span class="stat-label">Clientes Ativos</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="register-benefit-card">
+              <div class="benefit-icon">
+                <i data-lucide="star" class="w-6 h-6"></i>
+              </div>
+              <div class="benefit-content">
+                <h3 class="text-xl font-bold text-white mb-2">Sistema de Avaliações</h3>
+                <p class="text-white/80">Construa sua reputação digital com avaliações reais e conquiste a confiança dos clientes.</p>
+                <div class="benefit-stats">
+                  <span class="stat-number">4.8★</span>
+                  <span class="stat-label">Média de Avaliações</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="register-benefit-card">
+              <div class="benefit-icon">
+                <i data-lucide="trending-up" class="w-6 h-6"></i>
+              </div>
+              <div class="benefit-content">
+                <h3 class="text-xl font-bold text-white mb-2">Crescimento Garantido</h3>
+                <p class="text-white/80">Ferramentas avançadas de gestão e analytics para expandir seu negócio de forma inteligente.</p>
+                <div class="benefit-stats">
+                  <span class="stat-number">+40%</span>
+                  <span class="stat-label">Aumento Médio de Renda</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Registration Form -->
+          <div class="register-form-container">
+            <div class="form-header">
+              <h3 class="text-2xl font-bold text-white mb-2">Comece Agora</h3>
+              <p class="text-white/70">Preencha seus dados e junte-se aos profissionais de sucesso</p>
+            </div>
+            
+            <form id="registerForm" class="register-form">
+              <div class="form-group">
+                <label for="name" class="form-label">
+                  <i data-lucide="user" class="w-4 h-4"></i>
+                  Nome Completo
+                </label>
+                <input type="text" id="name" name="name" required class="form-input" placeholder="Digite seu nome completo">
+              </div>
+              
+              <div class="form-group">
+                <label for="email" class="form-label">
+                  <i data-lucide="mail" class="w-4 h-4"></i>
+                  Email Profissional
+                </label>
+                <input type="email" id="email" name="email" required class="form-input" placeholder="seu@email.com">
+              </div>
+              
+              <div class="form-group">
+                <label for="phone" class="form-label">
+                  <i data-lucide="phone" class="w-4 h-4"></i>
+                  Telefone/WhatsApp
+                </label>
+                <input type="tel" id="phone" name="phone" required class="form-input" placeholder="(11) 99999-9999">
+              </div>
+              
+              <div class="form-group">
+                <label for="service" class="form-label">
+                  <i data-lucide="briefcase" class="w-4 h-4"></i>
+                  Área de Especialização
+                </label>
+                <select id="service" name="service" required class="form-select">
+                  <option value="">Selecione sua especialidade</option>
+                  <option value="eletricista">⚡ Eletricista</option>
+                  <option value="encanador">🔧 Encanador</option>
+                  <option value="pedreiro">🧱 Pedreiro</option>
+                  <option value="pintor">🎨 Pintor</option>
+                  <option value="marceneiro">🪚 Marceneiro</option>
+                  <option value="jardineiro">🌱 Jardineiro</option>
+                  <option value="limpeza">✨ Limpeza</option>
+                  <option value="outros">🔨 Outros Serviços</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="experience" class="form-label">
+                  <i data-lucide="award" class="w-4 h-4"></i>
+                  Experiência Profissional
+                </label>
+                <select id="experience" name="experience" required class="form-select">
+                  <option value="">Selecione sua experiência</option>
+                  <option value="1-2">🌟 1-2 anos (Iniciante)</option>
+                  <option value="3-5">⭐ 3-5 anos (Experiente)</option>
+                  <option value="6-10">🏆 6-10 anos (Especialista)</option>
+                  <option value="10+">👑 Mais de 10 anos (Expert)</option>
+                </select>
+              </div>
+              
+              <button type="submit" class="form-submit-btn">
+                <span class="btn-text">Cadastrar Agora</span>
+                <i data-lucide="arrow-right" class="btn-icon"></i>
+                <div class="btn-glow"></div>
+              </button>
+              
+              <div class="form-footer">
+                <p class="text-white/60 text-sm text-center">
+                  <i data-lucide="shield-check" class="w-4 h-4 inline mr-1"></i>
+                  Seus dados estão seguros e protegidos
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="py-20 faq-bg relative">
+    <!-- Background Decorations -->
+    <div class="faq-decoration">
+      <div class="faq-shape shape-1"></div>
+      <div class="faq-shape shape-2"></div>
+      <div class="faq-shape shape-3"></div>
+      <div class="faq-shape shape-4"></div>
+    </div>
+    
+    <div class="container mx-auto px-6 relative z-10">
+      <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-16">
+          <div class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6">
+            <i data-lucide="help-circle" class="w-4 h-4 text-purple-400"></i>
+            <span class="text-sm font-medium text-white/90">Dúvidas Frequentes</span>
+          </div>
+          <h2 class="text-5xl md:text-6xl font-bold mb-6">
+            <span class="bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
+              Perguntas
+            </span>
+            <br>
+            <span class="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+              Frequentes
+            </span>
+          </h2>
+          <p class="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
+            Encontre respostas para as principais dúvidas sobre nossa plataforma e como ela pode transformar seu negócio.
+          </p>
+        </div>
+        
+        <div class="faq-container">
+          <div class="faq-item" data-faq="1">
+            <button class="faq-question">
+              <div class="question-content">
+                <div class="question-icon">
+                  <i data-lucide="zap" class="w-5 h-5"></i>
+                </div>
+                <span class="question-text">Como funciona o processo de contratação?</span>
+              </div>
+              <div class="question-toggle">
+                <i data-lucide="plus" class="faq-icon"></i>
+              </div>
+            </button>
+            <div class="faq-answer">
+              <div class="answer-content">
+                <p>Você se cadastra como cliente, escolhe o serviço desejado e contrata um profissional disponível na sua região. Nossa plataforma conecta você aos melhores profissionais de forma rápida e segura.</p>
+                <div class="answer-highlights">
+                  <div class="highlight-item">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>
+                    <span>Processo simples e rápido</span>
+                  </div>
+                  <div class="highlight-item">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-green-400"></i>
+                    <span>Profissionais verificados</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="faq-item" data-faq="2">
+            <button class="faq-question">
+              <div class="question-content">
+                <div class="question-icon">
+                  <i data-lucide="shield" class="w-5 h-5"></i>
+                </div>
+                <span class="question-text">Como garantem a segurança dos serviços?</span>
+              </div>
+              <div class="question-toggle">
+                <i data-lucide="plus" class="faq-icon"></i>
+              </div>
+            </button>
+            <div class="faq-answer">
+              <div class="answer-content">
+                <p>Todos os profissionais passam por um processo rigoroso de verificação e avaliações constantes para garantir qualidade e segurança em todos os serviços prestados.</p>
+                <div class="answer-highlights">
+                  <div class="highlight-item">
+                    <i data-lucide="user-check" class="w-4 h-4 text-blue-400"></i>
+                    <span>Verificação de identidade</span>
+                  </div>
+                  <div class="highlight-item">
+                    <i data-lucide="star" class="w-4 h-4 text-blue-400"></i>
+                    <span>Sistema de avaliações</span>
+                  </div>
+                  <div class="highlight-item">
+                    <i data-lucide="lock" class="w-4 h-4 text-blue-400"></i>
+                    <span>Garantia de qualidade</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="faq-item" data-faq="3">
+            <button class="faq-question">
+              <div class="question-content">
+                <div class="question-icon">
+                  <i data-lucide="building" class="w-5 h-5"></i>
+                </div>
+                <span class="question-text">Posso contratar para minha empresa?</span>
+              </div>
+              <div class="question-toggle">
+                <i data-lucide="plus" class="faq-icon"></i>
+              </div>
+            </button>
+            <div class="faq-answer">
+              <div class="answer-content">
+                <p>Sim! Estamos expandindo para atender também áreas empresariais com soluções personalizadas para diferentes tipos de negócios e necessidades corporativas.</p>
+                <div class="answer-highlights">
+                  <div class="highlight-item">
+                    <i data-lucide="briefcase" class="w-4 h-4 text-purple-400"></i>
+                    <span>Soluções corporativas</span>
+                  </div>
+                  <div class="highlight-item">
+                    <i data-lucide="users" class="w-4 h-4 text-purple-400"></i>
+                    <span>Atendimento personalizado</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="faq-footer">
+          <div class="faq-cta">
+            <h3>Ainda tem dúvidas?</h3>
+            <p>Nossa equipe de suporte está pronta para ajudar você</p>
+            <div class="cta-buttons">
+              <a href="#contact" class="cta-btn primary">
+                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                Falar com Suporte
+              </a>
+              <a href="#register" class="cta-btn secondary">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                Cadastrar Agora
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about-bg py-20 relative">
+    <!-- Background Decorations -->
+    <div class="about-decoration">
+      <div class="about-shape shape-1"></div>
+      <div class="about-shape shape-2"></div>
+      <div class="about-shape shape-3"></div>
+      <div class="about-shape shape-4"></div>
+    </div>
+    
+    <div class="container mx-auto px-6 relative z-10">
+      <div class="text-center mb-16">
+        <div class="about-badge inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium mb-6">
+          <i data-lucide="heart" class="w-4 h-4"></i>
+          Conheça Nossa História
+        </div>
+        <h2 class="text-5xl font-bold mb-6">
+          <span class="about-title-gradient">Sobre Nós</span>
+        </h2>
+        <p class="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+          Somos uma empresa especializada em conectar você aos melhores profissionais de reparo da sua região com tecnologia e confiança.
+        </p>
+      </div>
+      
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div class="about-content-card">
+          <div class="mission-icon mb-6">
+            <i data-lucide="target" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-3xl font-bold text-white mb-6">Nossa Missão</h3>
+          <p class="text-white/80 mb-8 text-lg leading-relaxed">
+            Facilitar o acesso a serviços de reparo de qualidade, conectando clientes e profissionais de forma rápida, segura e transparente através da tecnologia.
+          </p>
+          
+          <div class="space-y-4">
+            <div class="mission-item">
+              <div class="mission-item-icon">
+                <i data-lucide="shield-check" class="w-5 h-5"></i>
+              </div>
+              <div class="mission-item-content">
+                <h4>Profissionais Verificados</h4>
+                <p>Todos os profissionais passam por rigoroso processo de verificação</p>
+              </div>
+            </div>
+            <div class="mission-item">
+              <div class="mission-item-icon">
+                <i data-lucide="award" class="w-5 h-5"></i>
+              </div>
+              <div class="mission-item-content">
+                <h4>Garantia de Qualidade</h4>
+                <p>Garantimos a qualidade dos serviços com nossa política de satisfação</p>
+              </div>
+            </div>
+            <div class="mission-item">
+              <div class="mission-item-icon">
+                <i data-lucide="clock" class="w-5 h-5"></i>
+              </div>
+              <div class="mission-item-content">
+                <h4>Atendimento 24/7</h4>
+                <p>Suporte disponível a qualquer hora para resolver suas necessidades</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="about-stats-card">
+          <div class="stats-header">
+            <div class="stats-icon">
+              <i data-lucide="trending-up" class="w-8 h-8"></i>
+            </div>
+            <h4 class="text-2xl font-bold text-white mb-2">Por que escolher o ReparaFácil?</h4>
+            <p class="text-white/70 mb-6">Números que comprovam nossa excelência</p>
+          </div>
+          
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-number">5.000+</div>
+              <div class="stat-label">Profissionais Cadastrados</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">50.000+</div>
+              <div class="stat-label">Serviços Realizados</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">4.9★</div>
+              <div class="stat-label">Avaliação Média</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">98%</div>
+              <div class="stat-label">Satisfação do Cliente</div>
+            </div>
+          </div>
+          
+          <div class="benefits-list">
+            <div class="benefit-item">
+              <i data-lucide="check-circle" class="w-5 h-5"></i>
+              <span>Orçamentos gratuitos e transparentes</span>
+            </div>
+            <div class="benefit-item">
+              <i data-lucide="check-circle" class="w-5 h-5"></i>
+              <span>Pagamento seguro e protegido</span>
+            </div>
+            <div class="benefit-item">
+              <i data-lucide="check-circle" class="w-5 h-5"></i>
+              <span>Avaliações reais de clientes</span>
+            </div>
+            <div class="benefit-item">
+              <i data-lucide="check-circle" class="w-5 h-5"></i>
+              <span>Suporte especializado dedicado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer-bg relative">
+    <!-- Background Decorations -->
+    <div class="footer-decoration">
+      <div class="footer-shape shape-1"></div>
+      <div class="footer-shape shape-2"></div>
+      <div class="footer-shape shape-3"></div>
+    </div>
+    
+    <div class="container mx-auto px-6 relative z-10">
+      <!-- Main Footer Content -->
+      <div class="footer-main py-16">
+        <div class="grid lg:grid-cols-4 md:grid-cols-2 gap-8">
+          <!-- Brand Section -->
+          <div class="footer-brand">
+            <div class="brand-logo mb-6">
+              <div class="logo-icon">
+                <i data-lucide="wrench" class="w-8 h-8"></i>
+              </div>
+              <h3 class="text-2xl font-bold text-white">ReparaFácil</h3>
+            </div>
+            <p class="text-white/70 mb-6 leading-relaxed">
+              Conectando você aos melhores profissionais de reparo com tecnologia, segurança e confiança.
+            </p>
+            <div class="social-links">
+              <a href="#" class="social-link">
+                <i data-lucide="facebook" class="w-5 h-5"></i>
+              </a>
+              <a href="#" class="social-link">
+                <i data-lucide="twitter" class="w-5 h-5"></i>
+              </a>
+              <a href="#" class="social-link">
+                <i data-lucide="instagram" class="w-5 h-5"></i>
+              </a>
+              <a href="#" class="social-link">
+                <i data-lucide="linkedin" class="w-5 h-5"></i>
+              </a>
+            </div>
+          </div>
+          
+          <!-- Services Section -->
+          <div class="footer-section">
+            <h4 class="footer-title">
+              <i data-lucide="settings" class="w-5 h-5"></i>
+              Serviços
+            </h4>
+            <ul class="footer-links">
+              <li><a href="#" class="footer-link">Elétrica Residencial</a></li>
+              <li><a href="#" class="footer-link">Encanamento e Hidráulica</a></li>
+              <li><a href="#" class="footer-link">Pintura e Acabamento</a></li>
+              <li><a href="#" class="footer-link">Marcenaria e Móveis</a></li>
+              <li><a href="#" class="footer-link">Ar Condicionado</a></li>
+              <li><a href="#" class="footer-link">Jardinagem</a></li>
+            </ul>
+          </div>
+          
+          <!-- Support Section -->
+          <div class="footer-section">
+            <h4 class="footer-title">
+              <i data-lucide="help-circle" class="w-5 h-5"></i>
+              Suporte
+            </h4>
+            <ul class="footer-links">
+              <li><a href="#" class="footer-link">Central de Ajuda</a></li>
+              <li><a href="#" class="footer-link">Como Funciona</a></li>
+              <li><a href="#" class="footer-link">Seja um Profissional</a></li>
+              <li><a href="#" class="footer-link">Termos de Uso</a></li>
+              <li><a href="#" class="footer-link">Política de Privacidade</a></li>
+              <li><a href="#" class="footer-link">Segurança</a></li>
+            </ul>
+          </div>
+          
+          <!-- Contact Section -->
+          <div class="footer-section">
+            <h4 class="footer-title">
+              <i data-lucide="phone" class="w-5 h-5"></i>
+              Contato
+            </h4>
+            <div class="contact-info">
+              <div class="contact-item">
+                <div class="contact-icon">
+                  <i data-lucide="phone" class="w-4 h-4"></i>
+                </div>
+                <div class="contact-content">
+                  <span class="contact-label">Telefone</span>
+                  <span class="contact-value">(11) 9999-9999</span>
+                </div>
+              </div>
+              <div class="contact-item">
+                <div class="contact-icon">
+                  <i data-lucide="mail" class="w-4 h-4"></i>
+                </div>
+                <div class="contact-content">
+                  <span class="contact-label">Email</span>
+                  <span class="contact-value">contato@reparafacil.com</span>
+                </div>
+              </div>
+              <div class="contact-item">
+                <div class="contact-icon">
+                  <i data-lucide="map-pin" class="w-4 h-4"></i>
+                </div>
+                <div class="contact-content">
+                  <span class="contact-label">Localização</span>
+                  <span class="contact-value">São Paulo, SP</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Newsletter -->
+            <div class="newsletter-signup">
+              <h5 class="text-white font-semibold mb-3">Newsletter</h5>
+              <div class="newsletter-form">
+                <input type="email" placeholder="Seu email" class="newsletter-input">
+                <button class="newsletter-btn">
+                  <i data-lucide="send" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer Bottom -->
+      <div class="footer-bottom">
+        <div class="footer-bottom-content">
+          <div class="copyright">
+            <p>&copy; 2024 ReparaFácil. Todos os direitos reservados.</p>
+          </div>
+          <div class="footer-badges">
+            <div class="security-badge">
+              <i data-lucide="shield" class="w-4 h-4"></i>
+              <span>Site Seguro</span>
+            </div>
+            <div class="security-badge">
+              <i data-lucide="award" class="w-4 h-4"></i>
+              <span>Certificado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
