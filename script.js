@@ -108,7 +108,8 @@ emailInput.addEventListener('input', () => {
 // Type select removed from current form design
 
 // Submissão do formulário
-form.addEventListener('submit', (e) => {
+if (form) {
+  form.addEventListener('submit', (e) => {
   e.preventDefault();
   
   let isValid = true;
@@ -140,7 +141,7 @@ form.addEventListener('submit', (e) => {
     submitBtn.disabled = true;
     
     setTimeout(() => {
-      alert(`Cadastro realizado com sucesso!\n\nNome: ${nameInput.value}\nEmail: ${emailInput.value}\nTipo: ${typeSelect.options[typeSelect.selectedIndex].text}`);
+      alert(`Cadastro realizado com sucesso!\n\nNome: ${nameInput.value}\nEmail: ${emailInput.value}`);
       
       // Reset do formulário
       form.reset();
@@ -148,7 +149,8 @@ form.addEventListener('submit', (e) => {
       submitBtn.disabled = false;
     }, 2000);
   }
-});
+  });
+}
 
 // Animações de entrada
 const observerOptions = {
