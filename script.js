@@ -191,3 +191,54 @@ backToTopBtn.addEventListener('click', () => {
     behavior: 'smooth'
   });
 });
+
+// Plans Modal functionality
+const plansModal = document.getElementById('plansModal');
+const closePlansModal = document.getElementById('closePlansModal');
+const modalOverlay = document.querySelector('.modal-overlay');
+const planButtons = document.querySelectorAll('.plan-button');
+
+// Function to open modal
+function openPlansModal() {
+  plansModal.classList.add('active');
+  document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+// Function to close modal
+function closePlansModalFunc() {
+  plansModal.classList.remove('active');
+  document.body.style.overflow = 'auto'; // Restore scrolling
+}
+
+// Close modal when clicking the X button
+closePlansModal.addEventListener('click', closePlansModalFunc);
+
+// Close modal when clicking the overlay
+modalOverlay.addEventListener('click', closePlansModalFunc);
+
+// Close modal when pressing Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && plansModal.classList.contains('active')) {
+    closePlansModalFunc();
+  }
+});
+
+// Handle plan selection
+planButtons.forEach(button => {
+  button.addEventListener('click', (e) => {
+    const planType = e.target.classList.contains('plan-button-monthly') ? 'Mensal' :
+                    e.target.classList.contains('plan-button-quarterly') ? 'Trimestral' : 'Anual';
+    
+    // You can customize this action - for now, we'll show an alert
+    alert(`Você selecionou o Plano ${planType}! Em breve você será redirecionado para o pagamento.`);
+    
+    // Close modal after selection
+    closePlansModalFunc();
+    
+    // Here you could redirect to a payment page or open another modal
+    // window.location.href = `/checkout?plan=${planType.toLowerCase()}`;
+  });
+});
+
+// Make openPlansModal function globally available
+window.openPlansModal = openPlansModal;

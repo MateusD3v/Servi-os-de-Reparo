@@ -240,11 +240,11 @@
       </div>
       
       <div class="text-center mt-16">
-        <a href="#register" class="cta-button group">
-          <span class="relative z-10">Solicitar Orçamento</span>
-          <i data-lucide="calculator" class="ml-2 w-5 h-5 group-hover:scale-110 transition-transform"></i>
-        </a>
-      </div>
+          <button onclick="openPlansModal()" class="cta-button group">
+            <span class="relative z-10">Solicitar Plano</span>
+            <i data-lucide="calculator" class="ml-2 w-5 h-5 group-hover:scale-110 transition-transform"></i>
+          </button>
+        </div>
     </div>
   </section>
 
@@ -301,7 +301,7 @@
               <h4 class="author-name">João Silva</h4>
               <p class="author-location">
                 <i data-lucide="map-pin" class="w-4 h-4"></i>
-                São Paulo, SP
+                Belém, PA
               </p>
               <div class="service-badge">
                 <i data-lucide="zap" class="w-3 h-3"></i>
@@ -935,7 +935,7 @@
                 </div>
                 <div class="contact-content">
                   <span class="contact-label">Localização</span>
-                  <span class="contact-value">São Paulo, SP</span>
+                  <span class="contact-value">Belém, PA</span>
                 </div>
               </div>
             </div>
@@ -974,6 +974,118 @@
       </div>
     </div>
   </footer>
+
+  <!-- Plans Modal -->
+  <div id="plansModal" class="plans-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">📦 Planos ReparaFácil</h2>
+        <button id="closePlansModal" class="modal-close" aria-label="Fechar modal">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="plans-grid">
+          <!-- Plano Mensal -->
+          <div class="plan-card plan-monthly">
+            <div class="plan-header">
+              <h3 class="plan-title">🔹 Plano Mensal</h3>
+              <div class="plan-price">
+                <span class="price-value">R$ 15,00</span>
+                <span class="price-period">/mês</span>
+              </div>
+            </div>
+            <div class="plan-features">
+              <div class="feature-item">
+                <i data-lucide="check" class="feature-icon"></i>
+                <span>Acesso completo à plataforma</span>
+              </div>
+              <div class="feature-item">
+                <i data-lucide="check" class="feature-icon"></i>
+                <span>Solicitação de serviços de forma rápida e segura</span>
+              </div>
+              <div class="feature-item">
+                <i data-lucide="check" class="feature-icon"></i>
+                <span>Profissionais verificados pela ReparaFácil</span>
+              </div>
+              <div class="feature-item">
+                <i data-lucide="check" class="feature-icon"></i>
+                <span>Suporte online 24h</span>
+              </div>
+            </div>
+            <button class="plan-button plan-button-monthly">Escolher Plano</button>
+          </div>
+          
+          <!-- Plano Trimestral -->
+          <div class="plan-card plan-quarterly featured-plan">
+            <div class="plan-badge">Mais Popular</div>
+            <div class="plan-header">
+              <h3 class="plan-title">🔹 Plano Trimestral</h3>
+              <div class="plan-price">
+                <span class="price-value">R$ 40,00</span>
+                <span class="price-period">/3 meses</span>
+                <span class="price-discount">(R$ 13,33/mês)</span>
+              </div>
+            </div>
+            <div class="plan-features">
+              <div class="feature-group">
+                <span class="feature-group-title">Tudo do plano mensal, mais:</span>
+              </div>
+              <div class="feature-item">
+                <i data-lucide="sparkles" class="feature-icon special"></i>
+                <span>Desconto especial no valor da assinatura</span>
+              </div>
+              <div class="feature-item">
+                <i data-lucide="sparkles" class="feature-icon special"></i>
+                <span>Garantia estendida para serviços contratados (90 dias)</span>
+              </div>
+              <div class="feature-item">
+                <i data-lucide="sparkles" class="feature-icon special"></i>
+                <span>Prioridade na busca de profissionais disponíveis</span>
+              </div>
+            </div>
+            <button class="plan-button plan-button-quarterly">Escolher Plano</button>
+          </div>
+          
+          <!-- Plano Anual -->
+          <div class="plan-card plan-annual">
+            <div class="plan-header">
+              <h3 class="plan-title">🔹 Plano Anual</h3>
+              <div class="plan-price">
+                <span class="price-value">R$ 150,00</span>
+                <span class="price-period">/ano</span>
+                <span class="price-discount">(R$ 12,50/mês)</span>
+              </div>
+            </div>
+            <div class="plan-features">
+              <div class="feature-group">
+                <span class="feature-group-title">Tudo do plano trimestral, mais:</span>
+              </div>
+              <div class="feature-item">
+                <i data-lucide="star" class="feature-icon premium"></i>
+                <span>Maior economia ao longo do ano</span>
+              </div>
+              <div class="feature-item">
+                <i data-lucide="star" class="feature-icon premium"></i>
+                <span>Garantia estendida premium (1 ano em serviços certificados)</span>
+              </div>
+              <div class="feature-item">
+                <i data-lucide="star" class="feature-icon premium"></i>
+                <span>Atendimento preferencial no suporte 24/7</span>
+              </div>
+              <div class="feature-item">
+                <i data-lucide="star" class="feature-icon premium"></i>
+                <span>Benefícios exclusivos para clientes fiéis</span>
+              </div>
+            </div>
+            <button class="plan-button plan-button-annual">Escolher Plano</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Back to Top Button -->
   <button id="backToTop" class="back-to-top" aria-label="Voltar ao topo">
