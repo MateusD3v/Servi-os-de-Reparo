@@ -1,0 +1,10 @@
+.env.local
+node_modules/
+*.xlsx
+analyze_*.js
+deep_analyze.js
+find_real_data.js
+generate_report.js
+publish-main/
+publish-main-2/
+.git-broken-local/

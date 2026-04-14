@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema Financeiro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Baseado na planilha Controle Financeiro 3.0</p>
+          <h1>Sistema Financeiro Pessoal</h1>
+          <p class="hero-copy">
+            Entradas, saídas, gastos fixos, investimentos, metas e comparativo anual
+            em uma interface local mais prática que a planilha.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button class="ghost-button icon-button" id="toggle-theme" title="Alternar tema">🌓</button>
+          <label class="month-switcher top-switcher">
+            <span>Mês ativo</span>
+            <select id="month-select"></select>
+          </label>
+          <button class="ghost-button" id="import-excel">Importar Excel</button>
+          <button class="ghost-button" id="seed-demo">Carregar exemplo</button>
+          <button class="primary-button" id="reset-data">Limpar dados</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="tabs-shell card">
+          <nav class="tabs-nav" aria-label="Seções do sistema">
+            <button class="tab-button active" type="button" data-tab="painel">Painel</button>
+            <button class="tab-button" type="button" data-tab="configuracao">Configuração</button>
+            <button class="tab-button" type="button" data-tab="entradas">Entradas</button>
+            <button class="tab-button" type="button" data-tab="fixos">Gastos Fixos</button>
+            <button class="tab-button" type="button" data-tab="saidas">Saídas</button>
+            <button class="tab-button" type="button" data-tab="investimentos">Investimentos</button>
+            <button class="tab-button" type="button" data-tab="anual">Anual</button>
+          </nav>
+
+          <section class="tab-panel active" data-panel="painel">
+            <section class="sheet-hero" id="sheet-hero"></section>
+            <section class="summary-grid ledger-summary" id="summary-cards"></section>
+            
+            <section class="charts-grid">
+              <article class="chart-card">
+                <div class="sheet-card-header compact">
+                  <div>
+                    <p class="section-kicker">Distribuição</p>
+                    <h3>Gastos por Categoria</h3>
+                  </div>
+                </div>
+                <div class="chart-container">
+                  <canvas id="category-chart"></canvas>
+                </div>
+              </article>
+              <article class="chart-card">
+                <div class="sheet-card-header compact">
+                  <div>
+                    <p class="section-kicker">Evolução</p>
+                    <h3>Fluxo de Caixa (Mensal)</h3>
+                  </div>
+                </div>
+                <div class="chart-container">
+                  <canvas id="flow-chart"></canvas>
+                </div>
+              </article>
+            </section>
+
+            <section class="sheet-board">
+              <div class="sheet-main">
+                <article class="sheet-calendar-card">
+                  <div class="sheet-card-header">
+                    <div>
+                      <p class="section-kicker">Calendário Financeiro</p>
+                      <h3>Movimentações do mês</h3>
+                    </div>
+                    <div class="sheet-card-note" id="calendar-note"></div>
+                  </div>
+                  <div class="calendar-weekdays">
+                    <span>Dom</span>
+                    <span>Seg</span>
+                    <span>Ter</span>
+                    <span>Qua</span>
+                    <span>Qui</span>
+                    <span>Sex</span>
+                    <span>Sab</span>
+                  </div>
+                  <div class="calendar-grid" id="calendar-grid"></div>
+                </article>
+
+                <section class="insights-strip">
+                  <article class="insight-card">
+                    <div class="sheet-card-header compact">
+                      <div>
+                        <p class="section-kicker">Lançamentos</p>
+                        <h3>Atividade recente</h3>
+                      </div>
+                    </div>
+                    <div class="activity-list" id="recent-activity"></div>
+                  </article>
+
+                  <article class="sheet-sidebar-card">
+                    <div class="sheet-card-header compact">
+                      <div>
+                        <p class="section-kicker">Resumo do Mês</p>
+                        <h3>Blocos principais</h3>
+                      </div>
+                    </div>
+                    <div class="month-overview" id="month-overview"></div>
+                  </article>
+                </section>
+              </div>
+
+              <aside class="sheet-sidebar">
+                <article class="insight-card">
+                  <div class="sheet-card-header compact">
+                    <div>
+                      <p class="section-kicker">Metas</p>
+                      <h3>Progresso do mês</h3>
+                    </div>
+                  </div>
+                  <div class="goal-snapshot" id="goal-snapshot"></div>
+                </article>
+
+                <div class="sidebar-row">
+                  <article class="sheet-sidebar-card">
+                    <div class="sheet-card-header compact">
+                      <div>
+                        <p class="section-kicker">Pagamento</p>
+                        <h3>Saídas por forma</h3>
+                      </div>
+                    </div>
+                    <div class="breakdown-list" id="payment-breakdown"></div>
+                  </article>
+
+                  <article class="sheet-sidebar-card">
+                    <div class="sheet-card-header compact">
+                      <div>
+                        <p class="section-kicker">Categoria</p>
+                        <h3>Saídas por categoria</h3>
+                      </div>
+                    </div>
+                    <div class="breakdown-list" id="category-breakdown"></div>
+                  </article>
+                </div>
+              </aside>
+            </section>
+          </section>
+
+          <section class="tab-panel" data-panel="configuracao">
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">Configuração</p>
+                <h2>Base do sistema</h2>
+              </div>
+            </div>
+
+            <form id="settings-form" class="settings-grid">
+              <label>
+                Nome
+                <input type="text" id="owner-name" placeholder="Seu nome" />
+              </label>
+
+              <label>
+                Saldo inicial anual
+                <input type="number" step="0.01" id="initial-balance" placeholder="0.00" />
+              </label>
+
+              <label>
+                Ano de referência
+                <input type="number" step="1" id="active-year" placeholder="2026" />
+              </label>
+
+              <label>
+                Meta principal
+                <input type="text" id="headline-goal" placeholder="Ex: reserva de emergência" />
+              </label>
+
+              <label>
+                Descontar investimentos do saldo
+                <select id="investments-affect-balance">
+                  <option value="true">Sim</option>
+                  <option value="false">Não</option>
+                </select>
+              </label>
+            </form>
+
+            <details class="advanced-settings">
+              <summary>Configurações Avançadas (Supabase)</summary>
+              <div class="subcard remote-card">
+                <div class="subcard-header">
+                  <h3>Sincronização Nuvem</h3>
+                </div>
+                <div class="settings-grid">
+                  <label>
+                    Perfil remoto
+                    <input type="text" id="supabase-profile" placeholder="principal" />
+                  </label>
+
+                  <label>
+                    Auto sync
+                    <select id="supabase-auto-sync">
+                      <option value="false">Não</option>
+                      <option value="true">Sim</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="remote-actions">
+                  <button class="ghost-button" type="button" id="check-remote">Verificar conexão</button>
+                  <button class="ghost-button" type="button" id="pull-remote">Carregar do Supabase</button>
+                  <button class="primary-button" type="button" id="push-remote">Salvar no Supabase</button>
+                </div>
+                <p id="remote-status" class="remote-status">
+                  Configure o servidor local para sincronizar com o Supabase.
+                </p>
+              </div>
+            </details>
+          </section>
+
+          <section class="tab-panel" data-panel="entradas">
+            <div class="subcard">
+              <div class="subcard-header">
+                <h3>Entradas do mês</h3>
+                <button class="mini-button" data-add="income">Adicionar</button>
+              </div>
+              <div id="income-list" class="stack-list"></div>
+            </div>
+          </section>
+
+          <section class="tab-panel" data-panel="fixos">
+            <div class="subcard">
+              <div class="subcard-header">
+                <h3>Gastos fixos do mês</h3>
+                <button class="mini-button" data-add="fixed">Adicionar</button>
+              </div>
+              <div id="fixed-list" class="stack-list"></div>
+            </div>
+          </section>
+
+          <section class="tab-panel" data-panel="saidas">
+            <div class="subcard">
+              <div class="subcard-header">
+                <h3>Saídas do mês</h3>
+                <button class="mini-button" data-add="expense">Adicionar</button>
+              </div>
+              <div id="expense-list" class="stack-list"></div>
+            </div>
+          </section>
+
+          <section class="tab-panel" data-panel="investimentos">
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">Investimentos</p>
+                <h2>Metas e aportes</h2>
+              </div>
+              <button class="mini-button" id="add-goal">Adicionar meta</button>
+            </div>
+            <div id="goals-grid" class="goals-grid"></div>
+          </section>
+
+          <section class="tab-panel" data-panel="anual">
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">Anual</p>
+                <h2>Comparativo dos 12 meses</h2>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mês</th>
+                    <th>Entradas</th>
+                    <th>Saídas</th>
+                    <th>Investimentos</th>
+                    <th>Saldo</th>
+                  </tr>
+                </thead>
+                <tbody id="annual-table-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
