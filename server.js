@@ -12,6 +12,13 @@ const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const SUPABASE_TABLE = process.env.SUPABASE_TABLE || "finance_app_state";
 
+// Log para depuração na Vercel (sem mostrar a chave inteira por segurança)
+if (process.env.VERCEL) {
+  console.log("Executando na Vercel");
+  console.log("SUPABASE_URL configurada:", !!SUPABASE_URL);
+  console.log("SUPABASE_SERVICE_ROLE_KEY configurada:", !!SUPABASE_SERVICE_ROLE_KEY);
+}
+
 const MIME_TYPES = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",

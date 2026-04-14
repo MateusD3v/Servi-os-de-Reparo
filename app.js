@@ -151,6 +151,9 @@ function normalizeState(parsed = {}) {
 }
 
 function loadState() {
+  if (typeof localStorage === "undefined") {
+    return createDefaultState();
+  }
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) {
     return createDefaultState();
@@ -165,43 +168,76 @@ function loadState() {
 
 let state = loadState();
 
-const summaryCards = document.querySelector("#summary-cards");
-const monthSelect = document.querySelector("#month-select");
-const monthOverview = document.querySelector("#month-overview");
-const sheetHero = document.querySelector("#sheet-hero");
-const calendarNote = document.querySelector("#calendar-note");
-const calendarGrid = document.querySelector("#calendar-grid");
-const paymentBreakdown = document.querySelector("#payment-breakdown");
-const categoryBreakdown = document.querySelector("#category-breakdown");
-const recentActivity = document.querySelector("#recent-activity");
-const goalSnapshot = document.querySelector("#goal-snapshot");
-const incomeList = document.querySelector("#income-list");
-const fixedList = document.querySelector("#fixed-list");
-const expenseList = document.querySelector("#expense-list");
-const goalsGrid = document.querySelector("#goals-grid");
-const annualTableBody = document.querySelector("#annual-table-body");
-const settingsForm = document.querySelector("#settings-form");
-const seedDemoButton = document.querySelector("#seed-demo");
-const importExcelButton = document.querySelector("#import-excel");
-const resetButton = document.querySelector("#reset-data");
-const addGoalButton = document.querySelector("#add-goal");
-const tabButtons = document.querySelectorAll(".tab-button");
-const tabPanels = document.querySelectorAll(".tab-panel");
-const supabaseProfileInput = document.querySelector("#supabase-profile");
-const supabaseAutoSyncInput = document.querySelector("#supabase-auto-sync");
-const checkRemoteButton = document.querySelector("#check-remote");
-const pullRemoteButton = document.querySelector("#pull-remote");
-const pushRemoteButton = document.querySelector("#push-remote");
-const remoteStatus = document.querySelector("#remote-status");
+let summaryCards,
+  monthSelect,
+  monthOverview,
+  sheetHero,
+  calendarNote,
+  calendarGrid,
+  paymentBreakdown,
+  categoryBreakdown,
+  recentActivity,
+  goalSnapshot,
+  incomeList,
+  fixedList,
+  expenseList,
+  goalsGrid,
+  annualTableBody,
+  settingsForm,
+  seedDemoButton,
+  importExcelButton,
+  resetButton,
+  addGoalButton,
+  tabButtons,
+  tabPanels,
+  supabaseProfileInput,
+  supabaseAutoSyncInput,
+  checkRemoteButton,
+  pullRemoteButton,
+  pushRemoteButton,
+  remoteStatus;
+
+if (typeof document !== "undefined") {
+  summaryCards = document.querySelector("#summary-cards");
+  monthSelect = document.querySelector("#month-select");
+  monthOverview = document.querySelector("#month-overview");
+  sheetHero = document.querySelector("#sheet-hero");
+  calendarNote = document.querySelector("#calendar-note");
+  calendarGrid = document.querySelector("#calendar-grid");
+  paymentBreakdown = document.querySelector("#payment-breakdown");
+  categoryBreakdown = document.querySelector("#category-breakdown");
+  recentActivity = document.querySelector("#recent-activity");
+  goalSnapshot = document.querySelector("#goal-snapshot");
+  incomeList = document.querySelector("#income-list");
+  fixedList = document.querySelector("#fixed-list");
+  expenseList = document.querySelector("#expense-list");
+  goalsGrid = document.querySelector("#goals-grid");
+  annualTableBody = document.querySelector("#annual-table-body");
+  settingsForm = document.querySelector("#settings-form");
+  seedDemoButton = document.querySelector("#seed-demo");
+  importExcelButton = document.querySelector("#import-excel");
+  resetButton = document.querySelector("#reset-data");
+  addGoalButton = document.querySelector("#add-goal");
+  tabButtons = document.querySelectorAll(".tab-button");
+  tabPanels = document.querySelectorAll(".tab-panel");
+  supabaseProfileInput = document.querySelector("#supabase-profile");
+  supabaseAutoSyncInput = document.querySelector("#supabase-auto-sync");
+  checkRemoteButton = document.querySelector("#check-remote");
+  pullRemoteButton = document.querySelector("#pull-remote");
+  pushRemoteButton = document.querySelector("#push-remote");
+  remoteStatus = document.querySelector("#remote-status");
+}
 
 let categoryChart = null;
 let flowChart = null;
 
 let remoteAvailable = false;
 let remoteSyncTimer = null;
-const runningOnGithubPages = /github\.io$/i.test(window.location.hostname);
+const runningOnGithubPages =
+  typeof window !== "undefined" && /github\.io$/i.test(window.location.hostname);
 
 function saveState(options = {}) {
+  if (typeof localStorage === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   if (
     options.triggerRemote !== false &&
@@ -1401,40 +1437,42 @@ async function importFromExcel() {
   input.click();
 }
 
-seedDemoButton.addEventListener("click", seedDemoData);
-importExcelButton.addEventListener("click", importFromExcel);
-resetButton.addEventListener("click", () => {
-  state = createDefaultState();
-  saveState();
+if (typeof document !== "undefined") {
+  seedDemoButton.addEventListener("click", seedDemoData);
+  importExcelButton.addEventListener("click", importFromExcel);
+  resetButton.addEventListener("click", () => {
+    state = createDefaultState();
+    saveState();
+    renderAll();
+  });
+  addGoalButton.addEventListener("click", addGoal);
+  checkRemoteButton.addEventListener("click", () => {
+    checkRemoteConnection(true);
+  });
+  pullRemoteButton.addEventListener("click", () => {
+    pullStateFromRemote();
+  });
+  pushRemoteButton.addEventListener("click", () => {
+    pushStateToRemote(false);
+  });
+
+  const toggleThemeButton = document.querySelector("#toggle-theme");
+
+  toggleThemeButton.addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme");
+    const next = current === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("financeiro-theme", next);
+    renderCharts(); // Atualizar cores dos gráficos
+  });
+
+  // Carregar tema salvo
+  const savedTheme = localStorage.getItem("financeiro-theme");
+  if (savedTheme) {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }
+
   renderAll();
-});
-addGoalButton.addEventListener("click", addGoal);
-checkRemoteButton.addEventListener("click", () => {
-  checkRemoteConnection(true);
-});
-pullRemoteButton.addEventListener("click", () => {
-  pullStateFromRemote();
-});
-pushRemoteButton.addEventListener("click", () => {
-  pushStateToRemote(false);
-});
-
-const toggleThemeButton = document.querySelector("#toggle-theme");
-
-toggleThemeButton.addEventListener("click", () => {
-  const current = document.documentElement.getAttribute("data-theme");
-  const next = current === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", next);
-  localStorage.setItem("financeiro-theme", next);
-  renderCharts(); // Atualizar cores dos gráficos
-});
-
-// Carregar tema salvo
-const savedTheme = localStorage.getItem("financeiro-theme");
-if (savedTheme) {
-  document.documentElement.setAttribute("data-theme", savedTheme);
+  activateTab("painel");
+  checkRemoteConnection(false);
 }
-
-renderAll();
-activateTab("painel");
-checkRemoteConnection(false);
