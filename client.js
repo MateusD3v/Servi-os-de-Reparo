@@ -542,11 +542,6 @@ function renderSummary() {
     ["Investimentos", formatMoney(annual.investments), "primary", "🏦"],
     ["Saldo projetado", formatMoney(annual.balanceWithInitial), annual.balanceWithInitial >= 0 ? "positive" : "warn", "⚖️"],
     [
-      "Categoria líder",
-      annual.topCategory ? `${annual.topCategory[0]} - ${formatMoney(annual.topCategory[1])}` : "Sem dados",
-      "", "🏆"
-    ],
-    [
       "Pagamento mais usado",
       annual.topPayment ? `${annual.topPayment[0]} - ${formatMoney(annual.topPayment[1])}` : "Sem dados",
       "", "💳"
@@ -555,6 +550,11 @@ function renderSummary() {
       "Mês que mais gastou",
       annual.highestMonth ? `${annual.highestMonth.month} - ${formatMoney(annual.highestMonth.outputs)}` : "Sem dados",
       "", "🔥"
+    ],
+    [
+      "Categoria líder",
+      annual.topCategory ? `${annual.topCategory[0]} - ${formatMoney(annual.topCategory[1])}` : "Sem dados",
+      "", "🏆"
     ],
     [
       "Meta de Investimento",
@@ -570,7 +570,6 @@ function renderSummary() {
             <span>${label}</span>
             <strong>${value}</strong>
           </div>
-          ${label === "Meta de Investimento" && totalGoalsTarget > 0 ? `<div class="mini-progress"><span style="width:${goalProgress}%"></span></div>` : ""}
         </article>
       `
     )
