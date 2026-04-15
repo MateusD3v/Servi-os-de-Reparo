@@ -163,7 +163,7 @@ async function saveRemoteState(profile, payload) {
   return rows[0] || null;
 }
 
-function handleRequest(req, res) {
+async function handleRequest(req, res) {
   if (!req.url) {
     sendJson(res, 400, { error: "Requisição inválida." });
     return;
@@ -239,13 +239,7 @@ function handleRequest(req, res) {
 }
 
 if (process.env.VERCEL) {
-  module.exports = async (req, res) => {
-    await new Promise((resolve, reject) => {
-      handleRequest(req, res);
-      res.on("finish", resolve);
-      res.on("error", reject);
-    });
-  };
+  module.exports = (req, res) => handleRequest(req, res);
 } else {
   const server = http.createServer(handleRequest);
   server.listen(PORT, () => {
