@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { URL } = require("url");
 
-const ROOT = process.cwd();
+const ROOT = __dirname;
 const PORT = Number(process.env.PORT || 3010);
 
 loadEnvFile(path.join(ROOT, ".env.local"));
@@ -164,6 +164,13 @@ async function saveRemoteState(profile, payload) {
 }
 
 async function handleRequest(req, res) {
+  if (process.env.VERCEL) {
+    console.log("ROOT:", ROOT);
+    console.log("__dirname:", __dirname);
+    console.log("cwd:", process.cwd());
+    console.log("req.url:", req.url);
+  }
+
   if (!req.url) {
     sendJson(res, 400, { error: "Requisição inválida." });
     return;
