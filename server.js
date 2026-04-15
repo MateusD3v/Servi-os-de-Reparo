@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { URL } = require("url");
 
-const ROOT = process.cwd();
+const ROOT = path.dirname(require.main.filename);
 const PORT = Number(process.env.PORT || 3010);
 
 loadEnvFile(path.join(ROOT, ".env.local"));
