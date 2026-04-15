@@ -228,7 +228,11 @@ async function handleRequest(req, res) {
     return;
   }
 
-  const relativePath = requestUrl.pathname === "/" ? "/index.html" : requestUrl.pathname;
+  const staticPath =
+    requestUrl.pathname === "/favicon.ico" || requestUrl.pathname === "/favicon.png"
+      ? "/favicon.svg"
+      : requestUrl.pathname;
+  const relativePath = staticPath === "/" ? "/index.html" : staticPath;
   const resolvedPath = path.normalize(path.join(ROOT, relativePath));
 
   if (!resolvedPath.startsWith(ROOT)) {

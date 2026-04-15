@@ -8,3 +8,4 @@ generate_report.js
 publish-main/
 publish-main-2/
 .git-broken-local/
+.vercel
