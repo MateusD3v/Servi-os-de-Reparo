@@ -9,11 +9,13 @@ loadEnvFile(path.join(ROOT, ".env.local"));
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const SUPABASE_AUTH_KEY = process.env.SUPABASE_ANON_KEY || "";
 const SUPABASE_TABLE = process.env.SUPABASE_TABLE || "finance_app_state";
 
 if (process.env.VERCEL) {
   console.log("Executando na Vercel");
   console.log("SUPABASE_URL configurada:", !!SUPABASE_URL);
+  console.log("SUPABASE_ANON_KEY configurada:", !!process.env.SUPABASE_ANON_KEY);
   console.log("SUPABASE_SERVICE_ROLE_KEY configurada:", !!SUPABASE_SERVICE_ROLE_KEY);
 }
 
@@ -62,7 +64,7 @@ function sendJson(res, statusCode, payload) {
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET,POST,PUT,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
   });
   res.end(JSON.stringify(payload));
 }
@@ -110,7 +112,7 @@ function getSupabaseHeaders(extra = {}) {
 }
 
 function ensureSupabaseConfigured(res) {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SUPABASE_AUTH_KEY) {
     sendJson(res, 503, {
       connected: false,
       error: "Supabase nao configurado no servidor.",
@@ -118,6 +120,111 @@ function ensureSupabaseConfigured(res) {
     return false;
   }
   return true;
+}
+
+function getBearerToken(req) {
+  const header = req.headers.authorization || "";
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  return match ? match[1] : "";
+}
+
+function getUserProfile(user) {
+  return `user:${user.id}`;
+}
+
+function getAuthHeaders(accessToken = SUPABASE_AUTH_KEY) {
+  return {
+    apikey: SUPABASE_AUTH_KEY,
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  };
+}
+
+async function requestSupabaseAuth(endpoint, options = {}, accessToken) {
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/${endpoint}`, {
+    ...options,
+    headers: {
+      ...getAuthHeaders(accessToken),
+      ...(options.headers || {}),
+    },
+  });
+
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { error: text };
+  }
+  if (!response.ok) {
+    const rawMessage =
+      data.error_description ||
+      data.msg ||
+      data.error ||
+      `Supabase Auth falhou com status ${response.status}.`;
+    const error = new Error(
+      /email not confirmed/i.test(rawMessage)
+        ? "Email ainda não confirmado. Se essa conta foi criada antes da liberação automática, apague o usuário no Supabase e cadastre novamente pelo sistema."
+        : rawMessage
+    );
+    error.statusCode = response.status;
+    throw error;
+  }
+  return data;
+}
+
+async function requestSupabaseAdminAuth(endpoint, options = {}) {
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/${endpoint}`, {
+    ...options,
+    headers: {
+      ...getSupabaseHeaders(),
+      ...(options.headers || {}),
+    },
+  });
+
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { error: text };
+  }
+
+  if (!response.ok) {
+    const message =
+      data.error_description ||
+      data.msg ||
+      data.error ||
+      `Supabase Admin Auth falhou com status ${response.status}.`;
+    const error = new Error(message);
+    error.statusCode = response.status;
+    throw error;
+  }
+
+  return data;
+}
+
+async function getAuthenticatedUser(req) {
+  const accessToken = getBearerToken(req);
+  if (!accessToken) {
+    const error = new Error("Login obrigatorio.");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  try {
+    return await requestSupabaseAuth("user", { method: "GET" }, accessToken);
+  } catch (error) {
+    error.statusCode = 401;
+    throw error;
+  }
+}
+
+function sendHandledError(res, error) {
+  sendJson(res, error.statusCode || 500, {
+    connected: true,
+    error: error.message,
+  });
 }
 
 async function fetchRemoteState(profile) {
@@ -184,9 +291,99 @@ async function handleRequest(req, res) {
 
   if (requestUrl.pathname === "/api/health" && req.method === "GET") {
     sendJson(res, 200, {
-      connected: Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY),
+      connected: Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY && SUPABASE_AUTH_KEY),
       table: SUPABASE_TABLE,
     });
+    return;
+  }
+
+  if (requestUrl.pathname === "/api/auth/login" && req.method === "POST") {
+    if (!ensureSupabaseConfigured(res)) {
+      return;
+    }
+
+    try {
+      const body = await readBody(req);
+      const email = String(body.email || "").trim();
+      const password = String(body.password || "");
+      if (!email || !password) {
+        sendJson(res, 400, { error: "Informe email e senha." });
+        return;
+      }
+
+      const session = await requestSupabaseAuth("token?grant_type=password", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+      sendJson(res, 200, { session });
+    } catch (error) {
+      sendHandledError(res, error);
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === "/api/auth/signup" && req.method === "POST") {
+    if (!ensureSupabaseConfigured(res)) {
+      return;
+    }
+
+    try {
+      const body = await readBody(req);
+      const email = String(body.email || "").trim();
+      const password = String(body.password || "");
+      if (!email || !password) {
+        sendJson(res, 400, { error: "Informe email e senha." });
+        return;
+      }
+
+      await requestSupabaseAdminAuth("admin/users", {
+        method: "POST",
+        body: JSON.stringify({
+          email,
+          password,
+          email_confirm: true,
+        }),
+      });
+
+      const session = await requestSupabaseAuth("token?grant_type=password", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+      sendJson(res, 200, { session });
+    } catch (error) {
+      sendHandledError(res, error);
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === "/api/auth/user" && req.method === "GET") {
+    if (!ensureSupabaseConfigured(res)) {
+      return;
+    }
+
+    try {
+      const user = await getAuthenticatedUser(req);
+      sendJson(res, 200, { user });
+    } catch (error) {
+      sendHandledError(res, error);
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === "/api/auth/logout" && req.method === "POST") {
+    if (!ensureSupabaseConfigured(res)) {
+      return;
+    }
+
+    try {
+      const accessToken = getBearerToken(req);
+      if (accessToken) {
+        await requestSupabaseAuth("logout", { method: "POST" }, accessToken);
+      }
+      sendJson(res, 200, { ok: true });
+    } catch (error) {
+      sendHandledError(res, error);
+    }
     return;
   }
 
@@ -196,11 +393,12 @@ async function handleRequest(req, res) {
     }
 
     try {
-      const profile = requestUrl.searchParams.get("profile") || "principal";
+      const user = await getAuthenticatedUser(req);
+      const profile = getUserProfile(user);
       const data = await fetchRemoteState(profile);
       sendJson(res, 200, { connected: true, data });
     } catch (error) {
-      sendJson(res, 500, { connected: true, error: error.message });
+      sendHandledError(res, error);
     }
     return;
   }
@@ -211,8 +409,9 @@ async function handleRequest(req, res) {
     }
 
     try {
+      const user = await getAuthenticatedUser(req);
       const body = await readBody(req);
-      const profile = body.profile || "principal";
+      const profile = getUserProfile(user);
       const payload = body.payload;
 
       if (!payload || typeof payload !== "object") {
@@ -223,7 +422,7 @@ async function handleRequest(req, res) {
       const data = await saveRemoteState(profile, payload);
       sendJson(res, 200, { connected: true, data });
     } catch (error) {
-      sendJson(res, 500, { connected: true, error: error.message });
+      sendHandledError(res, error);
     }
     return;
   }
@@ -250,6 +449,7 @@ async function handleRequest(req, res) {
 
 module.exports = {
   PORT,
+  SUPABASE_AUTH_KEY,
   SUPABASE_SERVICE_ROLE_KEY,
   SUPABASE_URL,
   handleRequest,

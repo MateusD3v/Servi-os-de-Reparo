@@ -1,6 +1,6 @@
 # Sistema Financeiro Baseado em Planilha
 
-Este projeto transforma uma planilha de controle financeiro em um sistema web local com painel visual, organizacao mensal e sincronizacao opcional com Supabase.
+Este projeto transforma uma planilha de controle financeiro em um sistema web local com painel visual, organizacao mensal, login por usuario e sincronizacao com Supabase.
 
 ## O que o sistema cobre
 
@@ -10,7 +10,8 @@ Este projeto transforma uma planilha de controle financeiro em um sistema web lo
 - saidas por categoria e forma de pagamento
 - metas e investimentos
 - comparativo anual
-- sincronizacao remota com Supabase
+- login com Supabase Auth
+- dados financeiros separados por usuario
 
 ## Estrutura usada como referencia
 
@@ -27,9 +28,9 @@ A aplicacao foi inspirada principalmente na organizacao desses blocos e na logic
 
 ### Modo local
 
-Abra `index.html` no navegador.
+Rode `node server.js` e abra `http://localhost:3010`.
 
-Os dados ficam salvos no `localStorage` da maquina.
+O login usa o Supabase Auth e cada usuario carrega apenas o proprio estado financeiro.
 
 ### Modo online com GitHub Pages
 
@@ -44,10 +45,13 @@ Nesse modo:
 ### Modo com Supabase
 
 1. Crie a tabela usando `supabase-schema.sql`
-2. Copie `.env.example` para `.env.local`
-3. Preencha `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`
-4. Rode `node server.js`
-5. Abra `http://localhost:3010`
+2. No painel do Supabase, habilite Auth por email/senha
+3. Copie `.env.example` para `.env.local`
+4. Preencha `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY`
+5. Rode `node server.js`
+6. Abra `http://localhost:3010`
+
+O navegador nunca recebe a `SERVICE_ROLE`. Ela fica somente no servidor, que valida o token do usuario e grava os dados na chave `user:<id-do-usuario>`.
 
 ## Recursos principais
 
@@ -56,7 +60,8 @@ Nesse modo:
 - abas para configuracao, entradas, gastos fixos, saidas, investimentos e anual
 - resumo por categoria e forma de pagamento
 - metas com acompanhamento de progresso
-- auto sync opcional com perfil remoto no Supabase
+- login e cadastro por email/senha
+- salvamento automatico por usuario no Supabase
 
 ## Observacao
 

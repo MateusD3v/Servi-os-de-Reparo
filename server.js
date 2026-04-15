@@ -1,6 +1,7 @@
 const http = require("http");
 const {
   PORT,
+  SUPABASE_AUTH_KEY,
   SUPABASE_SERVICE_ROLE_KEY,
   SUPABASE_URL,
   handleRequest,
@@ -10,7 +11,7 @@ const server = http.createServer(handleRequest);
 
 server.listen(PORT, () => {
   console.log(`Servidor local em http://localhost:${PORT}`);
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SUPABASE_AUTH_KEY) {
     console.log("Supabase ainda nao configurado. Preencha o arquivo .env.local.");
   }
 });

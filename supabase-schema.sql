@@ -4,6 +4,8 @@ create table if not exists public.finance_app_state (
   updated_at timestamptz not null default now()
 );
 
+comment on table public.finance_app_state is 'Estado financeiro salvo por usuario. O servidor grava profile como user:<auth.users.id>.';
+
 alter table public.finance_app_state enable row level security;
 
 drop policy if exists "service_role_manage_finance_app_state" on public.finance_app_state;

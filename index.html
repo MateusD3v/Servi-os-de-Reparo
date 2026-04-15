@@ -25,24 +25,52 @@
             em uma interface local mais prática que a planilha.
           </p>
         </div>
-        <div class="hero-actions">
+        <div class="hero-actions" id="hero-actions">
           <button class="ghost-button icon-button" id="toggle-theme" title="Alternar tema">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-icon">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M12 2a10 10 0 0 0 0 20z" fill="currentColor"></path>
             </svg>
           </button>
-          <label class="month-switcher top-switcher">
+          <div class="auth-user is-hidden" id="auth-user">
+            <span id="auth-user-email"></span>
+            <button class="ghost-button" type="button" id="logout-button">Sair</button>
+          </div>
+          <label class="month-switcher top-switcher requires-auth">
             <span>Mês ativo</span>
             <select id="month-select"></select>
           </label>
-          <button class="ghost-button" id="import-excel">Importar Excel</button>
-          <button class="ghost-button" id="seed-demo">Carregar exemplo</button>
-          <button class="primary-button" id="reset-data">Limpar dados</button>
+          <button class="ghost-button requires-auth" id="import-excel">Importar Excel</button>
+          <button class="primary-button requires-auth" id="reset-data">Limpar dados</button>
         </div>
       </header>
 
-      <main class="layout">
+      <section class="auth-gate" id="auth-gate">
+        <article class="auth-card">
+          <div>
+            <p class="section-kicker">Acesso seguro</p>
+            <h2>Entre para abrir seu financeiro</h2>
+            <p>Seu painel, lançamentos e metas ficam vinculados ao seu usuário no Supabase.</p>
+          </div>
+          <form class="auth-form" id="auth-form">
+            <label>
+              Email
+              <input type="email" id="auth-email" autocomplete="email" required />
+            </label>
+            <label>
+              Senha
+              <input type="password" id="auth-password" autocomplete="current-password" required />
+            </label>
+            <div class="auth-actions">
+              <button class="primary-button" type="submit" data-auth-action="login">Entrar</button>
+              <button class="ghost-button" type="submit" data-auth-action="signup">Criar conta</button>
+            </div>
+            <p class="auth-status" id="auth-status"></p>
+          </form>
+        </article>
+      </section>
+
+      <main class="layout is-hidden" id="app-shell">
         <section class="tabs-shell card">
           <nav class="tabs-nav" aria-label="Seções do sistema">
             <button class="tab-button active" type="button" data-tab="painel">Painel</button>
@@ -116,19 +144,20 @@
                     <div class="activity-list" id="recent-activity"></div>
                   </article>
 
-                  <article class="sheet-sidebar-card">
-                    <div class="sheet-card-header compact">
-                      <div>
-                        <p class="section-kicker">Resumo do Mês</p>
-                        <h3>Blocos principais</h3>
-                      </div>
-                    </div>
-                    <div class="month-overview" id="month-overview"></div>
-                  </article>
                 </section>
               </div>
 
               <aside class="sheet-sidebar">
+                <article class="sheet-sidebar-card">
+                  <div class="sheet-card-header compact">
+                    <div>
+                      <p class="section-kicker">Resumo do Mês</p>
+                      <h3>Blocos principais</h3>
+                    </div>
+                  </div>
+                  <div class="month-overview" id="month-overview"></div>
+                </article>
+
                 <article class="insight-card">
                   <div class="sheet-card-header compact">
                     <div>
@@ -200,38 +229,18 @@
                   <option value="false">Não</option>
                 </select>
               </label>
+
+              <div class="category-limits-panel">
+                <div class="subcard-header">
+                  <div>
+                    <p class="section-kicker">Categorias</p>
+                    <h3>Limites mensais</h3>
+                  </div>
+                </div>
+                <div class="category-limits-grid" id="category-limits-grid"></div>
+              </div>
             </form>
 
-            <details class="advanced-settings">
-              <summary>Configurações Avançadas (Supabase)</summary>
-              <div class="subcard remote-card">
-                <div class="subcard-header">
-                  <h3>Sincronização Nuvem</h3>
-                </div>
-                <div class="settings-grid">
-                  <label>
-                    Perfil remoto
-                    <input type="text" id="supabase-profile" placeholder="principal" />
-                  </label>
-
-                  <label>
-                    Auto sync
-                    <select id="supabase-auto-sync">
-                      <option value="false">Não</option>
-                      <option value="true">Sim</option>
-                    </select>
-                  </label>
-                </div>
-                <div class="remote-actions">
-                  <button class="ghost-button" type="button" id="check-remote">Verificar conexão</button>
-                  <button class="ghost-button" type="button" id="pull-remote">Carregar do Supabase</button>
-                  <button class="primary-button" type="button" id="push-remote">Salvar no Supabase</button>
-                </div>
-                <p id="remote-status" class="remote-status">
-                  Configure o servidor local para sincronizar com o Supabase.
-                </p>
-              </div>
-            </details>
           </section>
 
           <section class="tab-panel" data-panel="entradas">

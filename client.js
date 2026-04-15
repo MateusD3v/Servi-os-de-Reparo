@@ -1,4 +1,5 @@
 const STORAGE_KEY = "financeiro-planilha-base-v1";
+const AUTH_STORAGE_KEY = "financeiro-auth-session-v1";
 
 const MONTHS = [
   "Janeiro",
@@ -42,6 +43,10 @@ const CATEGORIES = [
   "Presentes",
   "Desenvolvimento",
 ];
+
+function defaultCategoryLimits() {
+  return Object.fromEntries(CATEGORIES.map((category) => [category, 0]));
+}
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -92,6 +97,7 @@ function createDefaultState() {
       initialBalance: 0,
       headlineGoal: "",
       investmentsAffectBalance: true,
+      categoryLimits: defaultCategoryLimits(),
       supabaseProfile: "principal",
       supabaseAutoSync: true,
     },
@@ -138,7 +144,14 @@ function normalizeState(parsed = {}) {
   return {
     ...defaults,
     ...parsed,
-    settings: { ...defaults.settings, ...parsed.settings },
+    settings: {
+      ...defaults.settings,
+      ...parsed.settings,
+      categoryLimits: {
+        ...defaults.settings.categoryLimits,
+        ...(parsed.settings?.categoryLimits || {}),
+      },
+    },
     months: MONTHS.reduce((acc, month) => {
       acc[month] = {
         ...emptyMonth(),
@@ -150,11 +163,35 @@ function normalizeState(parsed = {}) {
   };
 }
 
+function loadAuthSession() {
+  if (typeof localStorage === "undefined") {
+    return null;
+  }
+
+  const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed?.access_token && parsed?.user?.id ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+let authSession = loadAuthSession();
+
+function getStateStorageKey() {
+  return authSession?.user?.id ? `${STORAGE_KEY}:${authSession.user.id}` : STORAGE_KEY;
+}
+
 function loadState() {
   if (typeof localStorage === "undefined") {
     return createDefaultState();
   }
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const raw = localStorage.getItem(getStateStorageKey());
   if (!raw) {
     return createDefaultState();
   }
@@ -190,6 +227,17 @@ let summaryCards,
   addGoalButton,
   tabButtons,
   tabPanels,
+  authGate,
+  appShell,
+  authForm,
+  authEmailInput,
+  authPasswordInput,
+  authStatus,
+  authUser,
+  authUserEmail,
+  logoutButton,
+  heroActions,
+  categoryLimitsGrid,
   supabaseProfileInput,
   supabaseAutoSyncInput,
   checkRemoteButton,
@@ -220,6 +268,17 @@ if (typeof document !== "undefined") {
   addGoalButton = document.querySelector("#add-goal");
   tabButtons = document.querySelectorAll(".tab-button");
   tabPanels = document.querySelectorAll(".tab-panel");
+  authGate = document.querySelector("#auth-gate");
+  appShell = document.querySelector("#app-shell");
+  authForm = document.querySelector("#auth-form");
+  authEmailInput = document.querySelector("#auth-email");
+  authPasswordInput = document.querySelector("#auth-password");
+  authStatus = document.querySelector("#auth-status");
+  authUser = document.querySelector("#auth-user");
+  authUserEmail = document.querySelector("#auth-user-email");
+  logoutButton = document.querySelector("#logout-button");
+  heroActions = document.querySelector("#hero-actions");
+  categoryLimitsGrid = document.querySelector("#category-limits-grid");
   supabaseProfileInput = document.querySelector("#supabase-profile");
   supabaseAutoSyncInput = document.querySelector("#supabase-auto-sync");
   checkRemoteButton = document.querySelector("#check-remote");
@@ -238,9 +297,10 @@ const runningOnGithubPages =
 
 function saveState(options = {}) {
   if (typeof localStorage === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(getStateStorageKey(), JSON.stringify(state));
   if (
     options.triggerRemote !== false &&
+    authSession?.access_token &&
     state.settings.supabaseAutoSync &&
     !runningOnGithubPages
   ) {
@@ -280,6 +340,35 @@ function formatDateLabel(value) {
   return `${day}/${month}/${year}`;
 }
 
+function parseExcelDate(value) {
+  if (!value) {
+    return "";
+  }
+
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  if (typeof value === "number") {
+    const date = new Date(Date.UTC(1899, 11, 30) + value * 86400000);
+    return date.toISOString().slice(0, 10);
+  }
+
+  const raw = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    return raw;
+  }
+
+  const brDate = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (brDate) {
+    const [, day, month, year] = brDate;
+    const fullYear = year.length === 2 ? `20${year}` : year;
+    return `${fullYear}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+
+  return "";
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -290,6 +379,7 @@ function escapeHtml(value) {
 }
 
 function setRemoteStatus(message, tone = "info") {
+  if (!remoteStatus) return;
   remoteStatus.textContent = message;
   remoteStatus.classList.remove("is-error", "is-ok", "is-info");
   if (tone === "error") {
@@ -304,18 +394,26 @@ function setRemoteStatus(message, tone = "info") {
 }
 
 function setRemoteControlsDisabled(isDisabled) {
+  if (!checkRemoteButton || !pullRemoteButton || !pushRemoteButton) return;
   checkRemoteButton.disabled = isDisabled;
   pullRemoteButton.disabled = isDisabled;
   pushRemoteButton.disabled = isDisabled;
 }
 
 async function apiRequest(url, options = {}) {
+  const { skipAuth = false, headers = {}, ...requestOptions } = options;
+  const authHeaders =
+    !skipAuth && authSession?.access_token
+      ? { Authorization: `Bearer ${authSession.access_token}` }
+      : {};
+
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
-      ...(options.headers || {}),
+      ...authHeaders,
+      ...headers,
     },
-    ...options,
+    ...requestOptions,
   });
 
   const data = await response.json().catch(() => ({}));
@@ -323,6 +421,132 @@ async function apiRequest(url, options = {}) {
     throw new Error(data.error || `Falha na requisição (${response.status}).`);
   }
   return data;
+}
+
+function setAuthStatus(message, tone = "info") {
+  if (!authStatus) return;
+  authStatus.textContent = message;
+  authStatus.classList.remove("is-error", "is-ok", "is-info");
+  authStatus.classList.add(`is-${tone}`);
+}
+
+function setAuthFormDisabled(isDisabled) {
+  if (!authForm) return;
+  authForm.querySelectorAll("input, button").forEach((control) => {
+    control.disabled = isDisabled;
+  });
+}
+
+function persistAuthSession(session) {
+  authSession = {
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+    expires_at: session.expires_at || Math.floor(Date.now() / 1000) + Number(session.expires_in || 3600),
+    user: session.user,
+  };
+  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authSession));
+}
+
+function clearAuthSession() {
+  authSession = null;
+  localStorage.removeItem(AUTH_STORAGE_KEY);
+}
+
+function renderAuthState() {
+  const isAuthenticated = Boolean(authSession?.access_token && authSession?.user?.id);
+
+  authGate?.classList.toggle("is-hidden", isAuthenticated);
+  appShell?.classList.toggle("is-hidden", !isAuthenticated);
+  authUser?.classList.toggle("is-hidden", !isAuthenticated);
+  heroActions?.classList.toggle("login-only-actions", !isAuthenticated);
+  document.querySelectorAll(".requires-auth").forEach((element) => {
+    element.classList.toggle("is-hidden", !isAuthenticated);
+  });
+
+  if (authUserEmail) {
+    authUserEmail.textContent = authSession?.user?.email || "";
+  }
+}
+
+async function loadRemoteStateForCurrentUser() {
+  const result = await pullStateFromRemote();
+  if (result === "loaded") {
+    return;
+  }
+
+  state = createDefaultState();
+  state.settings.ownerName = authSession?.user?.email?.split("@")[0] || "";
+  saveState({ triggerRemote: false });
+  renderAll();
+  await pushStateToRemote(true);
+}
+
+async function submitAuth(action) {
+  const email = authEmailInput.value.trim();
+  const password = authPasswordInput.value;
+
+  if (!email || !password) {
+    setAuthStatus("Informe email e senha.", "error");
+    return;
+  }
+
+  setAuthFormDisabled(true);
+  setAuthStatus(action === "signup" ? "Criando conta..." : "Entrando...", "info");
+
+  try {
+    const result = await apiRequest(`/api/auth/${action}`, {
+      method: "POST",
+      skipAuth: true,
+      body: JSON.stringify({ email, password }),
+    });
+
+    const session = result.session;
+    if (!session?.access_token || !session?.user) {
+      setAuthStatus("Conta criada. Confirme o email antes de entrar.", "ok");
+      return;
+    }
+
+    persistAuthSession(session);
+    state = loadState();
+    renderAuthState();
+    renderAll();
+    activateTab("painel");
+    await loadRemoteStateForCurrentUser();
+    setAuthStatus("", "info");
+  } catch (error) {
+    setAuthStatus(error.message || "Falha no acesso.", "error");
+  } finally {
+    setAuthFormDisabled(false);
+  }
+}
+
+async function restoreAuthSession() {
+  renderAuthState();
+
+  if (!authSession?.access_token) {
+    state = createDefaultState();
+    renderAll();
+    activateTab("painel");
+    return;
+  }
+
+  try {
+    const result = await apiRequest("/api/auth/user");
+    authSession.user = result.user;
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authSession));
+    state = loadState();
+    renderAuthState();
+    renderAll();
+    activateTab("painel");
+    await loadRemoteStateForCurrentUser();
+  } catch {
+    clearAuthSession();
+    state = createDefaultState();
+    renderAuthState();
+    renderAll();
+    activateTab("painel");
+    setAuthStatus("Sua sessão expirou. Entre novamente.", "error");
+  }
 }
 
 async function checkRemoteConnection(showSuccess = true) {
@@ -372,6 +596,11 @@ function scheduleRemotePush() {
 }
 
 async function pushStateToRemote(isSilent = false) {
+  if (!authSession?.access_token) {
+    setAuthStatus("Entre para salvar seus dados na nuvem.", "error");
+    return;
+  }
+
   if (runningOnGithubPages) {
     setRemoteStatus(
       "A versao publicada no GitHub Pages funciona em modo local no navegador. Para sincronizar com o Supabase, use a execucao local com node server.js.",
@@ -384,7 +613,6 @@ async function pushStateToRemote(isSilent = false) {
     await apiRequest("/api/state", {
       method: "PUT",
       body: JSON.stringify({
-        profile: state.settings.supabaseProfile || "principal",
         payload: state,
       }),
     });
@@ -399,6 +627,11 @@ async function pushStateToRemote(isSilent = false) {
 }
 
 async function pullStateFromRemote() {
+  if (!authSession?.access_token) {
+    setAuthStatus("Entre para carregar seus dados.", "error");
+    return "missing-auth";
+  }
+
   if (runningOnGithubPages) {
     setRemoteStatus(
       "A leitura remota nao esta habilitada na versao estatica do GitHub Pages. Use a execucao local com node server.js.",
@@ -408,14 +641,10 @@ async function pullStateFromRemote() {
   }
 
   try {
-    const result = await apiRequest(
-      `/api/state?profile=${encodeURIComponent(state.settings.supabaseProfile || "principal")}`,
-      { method: "GET" }
-    );
+    const result = await apiRequest("/api/state", { method: "GET" });
 
     if (!result.data || !result.data.payload) {
-      setRemoteStatus("Nenhum registro remoto encontrado para esse perfil.", "error");
-      return;
+      return "empty";
     }
 
     state = normalizeState(result.data.payload);
@@ -423,9 +652,11 @@ async function pullStateFromRemote() {
     renderAll();
     remoteAvailable = true;
     setRemoteStatus("Dados carregados do Supabase com sucesso.", "ok");
+    return "loaded";
   } catch (error) {
     remoteAvailable = false;
     setRemoteStatus(`Falha ao carregar do Supabase: ${error.message}`, "error");
+    return "error";
   }
 }
 
@@ -524,8 +755,28 @@ function renderSettings() {
   document.querySelector("#investments-affect-balance").value = String(
     state.settings.investmentsAffectBalance
   );
-  supabaseProfileInput.value = state.settings.supabaseProfile;
-  supabaseAutoSyncInput.value = String(state.settings.supabaseAutoSync);
+  if (categoryLimitsGrid) {
+    categoryLimitsGrid.innerHTML = CATEGORIES.map(
+      (category) => `
+        <label>
+          ${escapeHtml(category)}
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            data-category-limit="${escapeHtml(category)}"
+            value="${Number(state.settings.categoryLimits?.[category] || 0)}"
+          />
+        </label>
+      `
+    ).join("");
+  }
+  if (supabaseProfileInput) {
+    supabaseProfileInput.value = state.settings.supabaseProfile;
+  }
+  if (supabaseAutoSyncInput) {
+    supabaseAutoSyncInput.value = String(state.settings.supabaseAutoSync);
+  }
 }
 
 function renderSummary() {
@@ -614,7 +865,7 @@ function getBreakdown(items, key) {
   return [...map.entries()].sort((a, b) => b[1] - a[1]);
 }
 
-function renderBreakdown(container, rows, emptyLabel) {
+function renderBreakdown(container, rows, emptyLabel, options = {}) {
   if (!rows.length) {
     container.innerHTML = `<p class="empty-state">${emptyLabel}</p>`;
     return;
@@ -623,12 +874,19 @@ function renderBreakdown(container, rows, emptyLabel) {
   const maxValue = rows[0][1] || 1;
   container.innerHTML = rows
     .map(([name, value]) => {
-      const width = Math.max((value / maxValue) * 100, 6);
+      const limit = Number(options.limits?.[name] || 0);
+      const usage = limit > 0 ? (value / limit) * 100 : 0;
+      const widthBase = limit > 0 ? Math.min(usage, 100) : (value / maxValue) * 100;
+      const width = Math.max(widthBase, 6);
+      const limitText =
+        limit > 0
+          ? `${formatMoney(value)} de ${formatMoney(limit)} (${usage.toFixed(0)}%)`
+          : formatMoney(value);
       return `
-        <article class="breakdown-row">
+        <article class="breakdown-row ${usage > 100 ? "is-over-budget" : ""}">
           <div class="breakdown-head">
             <strong>${escapeHtml(name)}</strong>
-            <span>${formatMoney(value)}</span>
+            <span>${limitText}</span>
           </div>
           <div class="breakdown-bar"><span style="width:${width}%"></span></div>
         </article>
@@ -944,7 +1202,8 @@ function renderDashboard() {
   renderBreakdown(
     categoryBreakdown,
     getBreakdown(breakdownSource, "category"),
-    "Nenhuma saída classificada por categoria ainda."
+    "Nenhuma saída classificada por categoria ainda.",
+    { limits: state.settings.categoryLimits }
   );
   renderRecentActivity(selectedEntries);
   renderGoalSnapshot();
@@ -1110,8 +1369,19 @@ function updateSettings() {
   state.settings.headlineGoal = document.querySelector("#headline-goal").value;
   state.settings.investmentsAffectBalance =
     document.querySelector("#investments-affect-balance").value === "true";
-  state.settings.supabaseProfile = supabaseProfileInput.value || "principal";
-  state.settings.supabaseAutoSync = supabaseAutoSyncInput.value === "true";
+  state.settings.categoryLimits = {
+    ...defaultCategoryLimits(),
+    ...state.settings.categoryLimits,
+  };
+  document.querySelectorAll("[data-category-limit]").forEach((input) => {
+    state.settings.categoryLimits[input.dataset.categoryLimit] = Number(input.value || 0);
+  });
+  if (supabaseProfileInput) {
+    state.settings.supabaseProfile = supabaseProfileInput.value || "principal";
+  }
+  if (supabaseAutoSyncInput) {
+    state.settings.supabaseAutoSync = supabaseAutoSyncInput.value === "true";
+  }
   saveState();
   renderDashboard();
 }
@@ -1362,6 +1632,12 @@ async function importFromExcel() {
             const row = rows[i];
             if (!row) continue;
 
+            const categoryName = row[14];
+            const categoryLimit = Number(row[16] || 0);
+            if (CATEGORIES.includes(categoryName) && categoryLimit > 0) {
+              newState.settings.categoryLimits[categoryName] = categoryLimit;
+            }
+
             // Incomes
             if (row[9] && row[12] > 0) {
               newState.months[monthName].incomes.push({
@@ -1377,7 +1653,7 @@ async function importFromExcel() {
               newState.months[monthName].fixedCosts.push({
                 id: uid(),
                 description: String(row[14]),
-                date: row[15] ? String(row[15]) : "",
+                date: parseExcelDate(row[15]),
                 category: row[16] || CATEGORIES[0],
                 paymentMethod: row[17] || PAYMENT_METHODS[0],
                 amount: Number(row[18])
@@ -1389,9 +1665,9 @@ async function importFromExcel() {
               newState.months[monthName].expenses.push({
                 id: uid(),
                 description: String(row[22]),
-                date: row[23] ? String(row[23]) : "",
+                date: parseExcelDate(row[23]),
                 category: row[24] || CATEGORIES[0],
-                paymentMethod: "Débito",
+                paymentMethod: row[25] || PAYMENT_METHODS[0],
                 amount: Number(row[26])
               });
             }
@@ -1401,10 +1677,10 @@ async function importFromExcel() {
               newState.months[monthName].expenses.push({
                 id: uid(),
                 description: String(row[29]),
-                date: row[30] ? String(row[30]) : "",
+                date: parseExcelDate(row[30]),
                 installments: row[31] ? String(row[31]) : "",
                 category: row[32] || CATEGORIES[0],
-                paymentMethod: "Crédito 1",
+                paymentMethod: row[33] || "Crédito 1",
                 amount: Number(row[34])
               });
             }
@@ -1437,7 +1713,27 @@ async function importFromExcel() {
 }
 
 if (typeof document !== "undefined") {
-  seedDemoButton.addEventListener("click", seedDemoData);
+  authForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    submitAuth(event.submitter?.dataset.authAction || "login");
+  });
+
+  logoutButton.addEventListener("click", async () => {
+    try {
+      await apiRequest("/api/auth/logout", { method: "POST" });
+    } catch {
+      // The local session still needs to be cleared if the remote logout fails.
+    }
+    clearAuthSession();
+    state = createDefaultState();
+    renderAuthState();
+    renderAll();
+    activateTab("painel");
+  });
+
+  if (seedDemoButton) {
+    seedDemoButton.addEventListener("click", seedDemoData);
+  }
   importExcelButton.addEventListener("click", importFromExcel);
   resetButton.addEventListener("click", () => {
     state = createDefaultState();
@@ -1445,15 +1741,21 @@ if (typeof document !== "undefined") {
     renderAll();
   });
   addGoalButton.addEventListener("click", addGoal);
-  checkRemoteButton.addEventListener("click", () => {
-    checkRemoteConnection(true);
-  });
-  pullRemoteButton.addEventListener("click", () => {
-    pullStateFromRemote();
-  });
-  pushRemoteButton.addEventListener("click", () => {
-    pushStateToRemote(false);
-  });
+  if (checkRemoteButton) {
+    checkRemoteButton.addEventListener("click", () => {
+      checkRemoteConnection(true);
+    });
+  }
+  if (pullRemoteButton) {
+    pullRemoteButton.addEventListener("click", () => {
+      pullStateFromRemote();
+    });
+  }
+  if (pushRemoteButton) {
+    pushRemoteButton.addEventListener("click", () => {
+      pushStateToRemote(false);
+    });
+  }
 
   const toggleThemeButton = document.querySelector("#toggle-theme");
 
@@ -1471,7 +1773,8 @@ if (typeof document !== "undefined") {
     document.documentElement.setAttribute("data-theme", savedTheme);
   }
 
-  renderAll();
-  activateTab("painel");
-  checkRemoteConnection(false);
+  restoreAuthSession();
+  if (remoteStatus) {
+    checkRemoteConnection(false);
+  }
 }
