@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { URL } = require("url");
 
-const ROOT = __dirname;
+const ROOT = process.cwd();
 const PORT = Number(process.env.PORT || 3010);
 
 loadEnvFile(path.join(ROOT, ".env.local"));
@@ -163,7 +163,7 @@ async function saveRemoteState(profile, payload) {
   return rows[0] || null;
 }
 
-const server = http.createServer(async (req, res) => {
+function handleRequest(req, res) {
   if (!req.url) {
     sendJson(res, 400, { error: "Requisição inválida." });
     return;
@@ -236,11 +236,22 @@ const server = http.createServer(async (req, res) => {
   }
 
   sendFile(res, resolvedPath);
-});
+}
 
-server.listen(PORT, () => {
-  console.log(`Servidor local em http://localhost:${PORT}`);
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    console.log("Supabase ainda não configurado. Preencha o arquivo .env.local.");
-  }
-});
+if (process.env.VERCEL) {
+  module.exports = async (req, res) => {
+    await new Promise((resolve, reject) => {
+      handleRequest(req, res);
+      res.on("finish", resolve);
+      res.on("error", reject);
+    });
+  };
+} else {
+  const server = http.createServer(handleRequest);
+  server.listen(PORT, () => {
+    console.log(`Servidor local em http://localhost:${PORT}`);
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      console.log("Supabase ainda não configurado. Preencha o arquivo .env.local.");
+    }
+  });
+}
