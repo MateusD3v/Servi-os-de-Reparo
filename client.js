@@ -1061,8 +1061,9 @@ function renderCalendar(entries) {
       today.getMonth() === monthIndex &&
       today.getDate() === day;
 
+    const isMobile = window.innerWidth <= 768;
     const badges = dayEntries
-      .slice(0, 2)
+      .slice(0, isMobile ? 6 : 2)
       .map(
         (entry) => `
           <div class="calendar-event ${entry.type}">
@@ -1077,11 +1078,11 @@ function renderCalendar(entries) {
       <article class="calendar-cell ${isToday ? "is-today" : ""}">
         <div class="calendar-day">
           <strong>${String(day).padStart(2, "0")}</strong>
-          ${dayEntries.length ? `<span class="calendar-total">${formatCompactMoney(total)}</span>` : ""}
+          ${dayEntries.length && !isMobile ? `<span class="calendar-total">${formatCompactMoney(total)}</span>` : ""}
         </div>
         <div class="calendar-events">
           ${badges}
-          ${dayEntries.length > 2 ? `<div class="calendar-overflow">+${dayEntries.length - 2} lançamentos</div>` : ""}
+          ${dayEntries.length > (isMobile ? 6 : 2) ? `<div class="calendar-overflow">+${dayEntries.length - (isMobile ? 6 : 2)}</div>` : ""}
         </div>
       </article>
     `);
@@ -1171,11 +1172,13 @@ function renderAnnualTable() {
     .monthStats.map(
       (item) => `
         <tr>
-          <td>${item.month}</td>
+          <td style="font-weight: 800; color: var(--primary);">${item.month}</td>
           <td>${formatMoney(item.incomes)}</td>
-          <td>${formatMoney(item.outputs)}</td>
-          <td>${formatMoney(item.investments)}</td>
-          <td>${formatMoney(item.balance)}</td>
+          <td style="color: var(--warn);">${formatMoney(item.outputs)}</td>
+          <td style="color: var(--primary);">${formatMoney(item.investments)}</td>
+          <td style="font-weight: 800; color: ${item.balance >= 0 ? "var(--positive)" : "var(--warn)"};">
+            ${formatMoney(item.balance)}
+          </td>
         </tr>
       `
     )
@@ -1211,6 +1214,11 @@ function renderDashboard() {
 }
 
 function renderCharts() {
+  const categoryCanvas = document.getElementById('category-chart');
+  const flowCanvas = document.getElementById('flow-chart');
+
+  if (!categoryCanvas || !flowCanvas) return;
+
   const isDark = document.documentElement.getAttribute("data-theme") === "dark";
   const textColor = isDark ? "#f8fbff" : "#162334";
   const gridColor = isDark ? "rgba(248, 251, 255, 0.1)" : "rgba(22, 35, 52, 0.1)";
@@ -1221,10 +1229,10 @@ function renderCharts() {
     ...state.months[state.selectedMonth].expenses,
   ];
   const categoryData = getBreakdown(breakdownSource, "category");
-  
-  const categoryCtx = document.getElementById('category-chart').getContext('2d');
+
+  const categoryCtx = categoryCanvas.getContext('2d');
   if (categoryChart) categoryChart.destroy();
-  
+
   categoryChart = new Chart(categoryCtx, {
     type: 'doughnut',
     data: {
@@ -1232,7 +1240,7 @@ function renderCharts() {
       datasets: [{
         data: categoryData.map(d => d[1]),
         backgroundColor: [
-          '#2f5d8c', '#d87b4d', '#157f5b', '#b44d32', '#5e6a78', 
+          '#2f5d8c', '#d87b4d', '#157f5b', '#b44d32', '#5e6a78',
           '#4ade80', '#60a5fa', '#fb923c', '#f87171', '#94a3b8'
         ],
         borderWidth: 0
@@ -1252,7 +1260,7 @@ function renderCharts() {
 
   // 2. Gráfico de Fluxo de Caixa (Anual)
   const annualStats = getAnnualStats();
-  const flowCtx = document.getElementById('flow-chart').getContext('2d');
+  const flowCtx = flowCanvas.getContext('2d');
   if (flowChart) flowChart.destroy();
 
   flowChart = new Chart(flowCtx, {
@@ -1759,13 +1767,15 @@ if (typeof document !== "undefined") {
 
   const toggleThemeButton = document.querySelector("#toggle-theme");
 
-  toggleThemeButton.addEventListener("click", () => {
-    const current = document.documentElement.getAttribute("data-theme");
-    const next = current === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem("financeiro-theme", next);
-    renderCharts(); // Atualizar cores dos gráficos
-  });
+  if (toggleThemeButton) {
+    toggleThemeButton.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme");
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("financeiro-theme", next);
+      renderCharts(); // Atualizar cores dos gráficos
+    });
+  }
 
   // Carregar tema salvo
   const savedTheme = localStorage.getItem("financeiro-theme");
