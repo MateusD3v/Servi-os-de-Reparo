@@ -71,10 +71,15 @@ function getSecurityHeaders(req, contentType) {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
     "Content-Security-Policy":
       "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' " +
       (SUPABASE_URL || "https://*.supabase.co"),
   };
+
+  if (contentType.startsWith("application/json")) {
+    headers["Cache-Control"] = "no-store";
+  }
 
   if (origin && allowedOrigins.includes(origin)) {
     headers["Access-Control-Allow-Origin"] = origin;
@@ -318,7 +323,10 @@ async function handleRequest(req, res) {
   const isAuthRequest =
     requestUrl.pathname === "/api/auth/login" || requestUrl.pathname === "/api/auth/signup";
   if (isAuthRequest && req.method === "POST") {
-    const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress || "0.0.0.0";
+    const ip =
+      String(req.headers["x-forwarded-for"] || req.connection.remoteAddress || "0.0.0.0")
+        .split(",")[0]
+        .trim() || "0.0.0.0";
     const now = Date.now();
     const attempts = authAttempts.get(ip) || [];
     const recentAttempts = attempts.filter((t) => now - t < 60000); // 1 minute window
@@ -337,7 +345,6 @@ async function handleRequest(req, res) {
       200,
       {
         connected: Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY && SUPABASE_AUTH_KEY),
-        table: SUPABASE_TABLE,
       },
       req
     );
@@ -383,18 +390,12 @@ async function handleRequest(req, res) {
         return;
       }
 
-      await requestSupabaseAdminAuth("admin/users", {
+      const session = await requestSupabaseAuth("signup", {
         method: "POST",
         body: JSON.stringify({
           email,
           password,
-          email_confirm: true,
         }),
-      });
-
-      const session = await requestSupabaseAuth("token?grant_type=password", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
       });
       sendJson(res, 200, { session }, req);
     } catch (error) {

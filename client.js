@@ -185,12 +185,32 @@ function hasMeaningfulState(snapshot = {}) {
   return hasOwnerName || hasHeadlineGoal || hasInitialBalance || hasCategoryLimits || hasGoals || hasEntries;
 }
 
+function getAuthStorage() {
+  if (typeof sessionStorage !== "undefined") {
+    return sessionStorage;
+  }
+  if (typeof localStorage !== "undefined") {
+    return localStorage;
+  }
+  return null;
+}
+
 function loadAuthSession() {
-  if (typeof localStorage === "undefined") {
+  const authStorage = getAuthStorage();
+  if (!authStorage) {
     return null;
   }
 
-  const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+  let raw = authStorage.getItem(AUTH_STORAGE_KEY);
+  if (!raw && typeof localStorage !== "undefined" && authStorage !== localStorage) {
+    const legacyRaw = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (legacyRaw) {
+      authStorage.setItem(AUTH_STORAGE_KEY, legacyRaw);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      raw = legacyRaw;
+    }
+  }
+
   if (!raw) {
     return null;
   }
@@ -219,22 +239,7 @@ function loadState() {
   if (typeof localStorage === "undefined") {
     return createDefaultState();
   }
-  const stateKey = getStateStorageKey();
-  let raw = localStorage.getItem(stateKey);
-
-  if (!raw && stateKey !== STORAGE_KEY) {
-    const legacyRaw = localStorage.getItem(STORAGE_KEY);
-    if (legacyRaw) {
-      try {
-        const legacyParsed = JSON.parse(legacyRaw);
-        if (hasMeaningfulState(legacyParsed)) {
-          return normalizeState(legacyParsed);
-        }
-      } catch {
-        // Ignore invalid legacy state and continue with defaults.
-      }
-    }
-  }
+  const raw = localStorage.getItem(getStateStorageKey());
 
   if (!raw) {
     return createDefaultState();
@@ -482,17 +487,25 @@ function setAuthFormDisabled(isDisabled) {
 }
 
 function persistAuthSession(session) {
+  const authStorage = getAuthStorage();
   authSession = {
     access_token: session.access_token,
     expires_at: session.expires_at || Math.floor(Date.now() / 1000) + Number(session.expires_in || 3600),
     user: session.user,
   };
-  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authSession));
+  authStorage?.setItem(AUTH_STORAGE_KEY, JSON.stringify(authSession));
+  if (typeof localStorage !== "undefined" && authStorage !== localStorage) {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+  }
 }
 
 function clearAuthSession() {
+  const authStorage = getAuthStorage();
   authSession = null;
-  localStorage.removeItem(AUTH_STORAGE_KEY);
+  authStorage?.removeItem(AUTH_STORAGE_KEY);
+  if (typeof localStorage !== "undefined" && authStorage !== localStorage) {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+  }
 }
 
 function renderAuthState() {
@@ -595,7 +608,7 @@ async function restoreAuthSession() {
   try {
     const result = await apiRequest("/api/auth/user");
     authSession.user = result.user;
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authSession));
+    getAuthStorage()?.setItem(AUTH_STORAGE_KEY, JSON.stringify(authSession));
     state = loadState();
     renderAuthState();
     renderAll();
@@ -629,8 +642,8 @@ async function checkRemoteConnection(showSuccess = true) {
     if (result.connected) {
       setRemoteStatus(
         showSuccess
-          ? `Servidor conectado ao Supabase. Tabela ativa: ${result.table}.`
-          : `Supabase conectado e pronto. Tabela ativa: ${result.table}.`,
+          ? "Servidor conectado ao Supabase."
+          : "Supabase conectado e pronto.",
         showSuccess ? "ok" : "info"
       );
     } else {
