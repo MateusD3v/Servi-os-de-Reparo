@@ -163,6 +163,28 @@ function normalizeState(parsed = {}) {
   };
 }
 
+function hasMeaningfulState(snapshot = {}) {
+  const normalized = normalizeState(snapshot);
+  const hasOwnerName = Boolean(String(normalized.settings?.ownerName || "").trim());
+  const hasHeadlineGoal = Boolean(String(normalized.settings?.headlineGoal || "").trim());
+  const hasInitialBalance = Number(normalized.settings?.initialBalance || 0) !== 0;
+  const hasCategoryLimits = Object.values(normalized.settings?.categoryLimits || {}).some(
+    (value) => Number(value || 0) > 0
+  );
+  const hasGoals = Array.isArray(normalized.goals) && normalized.goals.length > 0;
+  const hasEntries = MONTHS.some((month) => {
+    const bucket = normalized.months?.[month];
+    return Boolean(
+      (bucket?.incomes || []).length ||
+        (bucket?.fixedCosts || []).length ||
+        (bucket?.expenses || []).length ||
+        (bucket?.investments || []).length
+    );
+  });
+
+  return hasOwnerName || hasHeadlineGoal || hasInitialBalance || hasCategoryLimits || hasGoals || hasEntries;
+}
+
 function loadAuthSession() {
   if (typeof localStorage === "undefined") {
     return null;
@@ -175,7 +197,13 @@ function loadAuthSession() {
 
   try {
     const parsed = JSON.parse(raw);
-    return parsed?.access_token && parsed?.user?.id ? parsed : null;
+    return parsed?.access_token && parsed?.user?.id
+      ? {
+          access_token: parsed.access_token,
+          expires_at: parsed.expires_at,
+          user: parsed.user,
+        }
+      : null;
   } catch {
     return null;
   }
@@ -191,7 +219,23 @@ function loadState() {
   if (typeof localStorage === "undefined") {
     return createDefaultState();
   }
-  const raw = localStorage.getItem(getStateStorageKey());
+  const stateKey = getStateStorageKey();
+  let raw = localStorage.getItem(stateKey);
+
+  if (!raw && stateKey !== STORAGE_KEY) {
+    const legacyRaw = localStorage.getItem(STORAGE_KEY);
+    if (legacyRaw) {
+      try {
+        const legacyParsed = JSON.parse(legacyRaw);
+        if (hasMeaningfulState(legacyParsed)) {
+          return normalizeState(legacyParsed);
+        }
+      } catch {
+        // Ignore invalid legacy state and continue with defaults.
+      }
+    }
+  }
+
   if (!raw) {
     return createDefaultState();
   }
@@ -440,7 +484,6 @@ function setAuthFormDisabled(isDisabled) {
 function persistAuthSession(session) {
   authSession = {
     access_token: session.access_token,
-    refresh_token: session.refresh_token,
     expires_at: session.expires_at || Math.floor(Date.now() / 1000) + Number(session.expires_in || 3600),
     user: session.user,
   };
@@ -468,17 +511,36 @@ function renderAuthState() {
   }
 }
 
-async function loadRemoteStateForCurrentUser() {
+async function loadRemoteStateForCurrentUser(options = {}) {
+  const { allowRemoteInitialize = false } = options;
   const result = await pullStateFromRemote();
   if (result === "loaded") {
-    return;
+    return "loaded";
   }
 
-  state = createDefaultState();
-  state.settings.ownerName = authSession?.user?.email?.split("@")[0] || "";
-  saveState({ triggerRemote: false });
-  renderAll();
-  await pushStateToRemote(true);
+  if (result === "empty") {
+    if (hasMeaningfulState(state)) {
+      setRemoteStatus("Nenhum dado remoto encontrado. Mantidos os dados locais deste dispositivo.", "info");
+      renderAll();
+      return "kept-local";
+    }
+
+    if (allowRemoteInitialize) {
+      state = createDefaultState();
+      state.settings.ownerName = authSession?.user?.email?.split("@")[0] || "";
+      saveState({ triggerRemote: false });
+      renderAll();
+      await pushStateToRemote(true);
+      return "initialized-remote";
+    }
+
+    setRemoteStatus("Nenhum dado remoto encontrado para esta conta ainda.", "info");
+    renderAll();
+    return "empty";
+  }
+
+  setRemoteStatus("Falha ao sincronizar automaticamente. Seus dados locais foram preservados.", "error");
+  return result;
 }
 
 async function submitAuth(action) {
@@ -511,7 +573,7 @@ async function submitAuth(action) {
     renderAuthState();
     renderAll();
     activateTab("painel");
-    await loadRemoteStateForCurrentUser();
+    await loadRemoteStateForCurrentUser({ allowRemoteInitialize: action === "signup" });
     setAuthStatus("", "info");
   } catch (error) {
     setAuthStatus(error.message || "Falha no acesso.", "error");
@@ -710,10 +772,10 @@ function createField(field, value = "") {
   if (type === "payment") {
     return `
       <label class="field-block">
-        ${label}
+        ${escapeHtml(label)}
         <select data-field="${key}">
           ${PAYMENT_METHODS.map(
-            (item) => `<option value="${item}" ${item === value ? "selected" : ""}>${item}</option>`
+            (item) => `<option value="${escapeHtml(item)}" ${item === value ? "selected" : ""}>${escapeHtml(item)}</option>`
           ).join("")}
         </select>
       </label>
@@ -723,10 +785,10 @@ function createField(field, value = "") {
   if (type === "category") {
     return `
       <label class="field-block">
-        ${label}
+        ${escapeHtml(label)}
         <select data-field="${key}">
           ${CATEGORIES.map(
-            (item) => `<option value="${item}" ${item === value ? "selected" : ""}>${item}</option>`
+            (item) => `<option value="${escapeHtml(item)}" ${item === value ? "selected" : ""}>${escapeHtml(item)}</option>`
           ).join("")}
         </select>
       </label>
@@ -735,8 +797,8 @@ function createField(field, value = "") {
 
   return `
     <label class="field-block">
-      ${label}
-      <input data-field="${key}" type="${type}" value="${value ?? ""}" ${type === "number" ? 'step="0.01"' : ""} />
+      ${escapeHtml(label)}
+      <input data-field="${key}" type="${type}" value="${escapeHtml(value ?? "")}" ${type === "number" ? 'step="0.01"' : ""} />
     </label>
   `;
 }
@@ -867,7 +929,7 @@ function getBreakdown(items, key) {
 
 function renderBreakdown(container, rows, emptyLabel, options = {}) {
   if (!rows.length) {
-    container.innerHTML = `<p class="empty-state">${emptyLabel}</p>`;
+    container.innerHTML = `<p class="empty-state">${escapeHtml(emptyLabel)}</p>`;
     return;
   }
 
@@ -1140,11 +1202,11 @@ function renderGoals() {
         <article class="goal-card" data-goal-id="${goal.id}">
           <label class="field-block">
             Nome da meta
-            <input type="text" data-goal-field="name" value="${goal.name}" />
+            <input type="text" data-goal-field="name" value="${escapeHtml(goal.name)}" />
           </label>
           <label class="field-block">
             Valor alvo
-            <input type="number" step="0.01" data-goal-field="target" value="${goal.target}" />
+            <input type="number" step="0.01" data-goal-field="target" value="${escapeHtml(goal.target)}" />
           </label>
           <div class="goal-progress"><span style="width: ${progress}%"></span></div>
           <div class="goal-meta">
@@ -1157,7 +1219,7 @@ function renderGoals() {
               type="number"
               step="0.01"
               data-goal-investment="${goal.id}"
-              value="${findInvestmentValue(state.selectedMonth, goal.id)}"
+              value="${escapeHtml(findInvestmentValue(state.selectedMonth, goal.id))}"
             />
           </div>
           <button class="danger-link" type="button" data-delete-goal="${goal.id}">Remover meta</button>
@@ -1171,12 +1233,12 @@ function renderAnnualTable() {
   annualTableBody.innerHTML = getAnnualStats()
     .monthStats.map(
       (item) => `
-        <tr>
-          <td style="font-weight: 800; color: var(--primary);">${item.month}</td>
-          <td>${formatMoney(item.incomes)}</td>
-          <td style="color: var(--warn);">${formatMoney(item.outputs)}</td>
-          <td style="color: var(--primary);">${formatMoney(item.investments)}</td>
-          <td style="font-weight: 800; color: ${item.balance >= 0 ? "var(--positive)" : "var(--warn)"};">
+        <tr class="annual-row">
+          <td class="annual-month" data-label="Mês" style="font-weight: 800; color: var(--primary);">${item.month}</td>
+          <td data-label="Entradas">${formatMoney(item.incomes)}</td>
+          <td data-label="Saídas" style="color: var(--warn);">${formatMoney(item.outputs)}</td>
+          <td data-label="Investimentos" style="color: var(--primary);">${formatMoney(item.investments)}</td>
+          <td data-label="Saldo" style="font-weight: 800; color: ${item.balance >= 0 ? "var(--positive)" : "var(--warn)"};">
             ${formatMoney(item.balance)}
           </td>
         </tr>
@@ -1217,7 +1279,7 @@ function renderCharts() {
   const categoryCanvas = document.getElementById('category-chart');
   const flowCanvas = document.getElementById('flow-chart');
 
-  if (!categoryCanvas || !flowCanvas) return;
+  if (!categoryCanvas || !flowCanvas || typeof Chart === "undefined") return;
 
   const isDark = document.documentElement.getAttribute("data-theme") === "dark";
   const textColor = isDark ? "#f8fbff" : "#162334";
@@ -1321,7 +1383,8 @@ function renderAll() {
 
 function activateTab(tabName) {
   tabButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.tab === tabName);
+    const isActive = button.dataset.tab === tabName;
+    button.classList.toggle("active", isActive);
   });
 
   tabPanels.forEach((panel) => {
@@ -1591,6 +1654,11 @@ document.body.addEventListener("change", (event) => {
 });
 
 async function importFromExcel() {
+  if (typeof XLSX === "undefined") {
+    alert("A biblioteca de importacao nao carregou. Recarregue a pagina e tente novamente.");
+    return;
+  }
+
   const input = document.createElement("input");
   input.type = "file";
   input.accept = ".xlsx";

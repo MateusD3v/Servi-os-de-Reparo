@@ -12,13 +12,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const SUPABASE_AUTH_KEY = process.env.SUPABASE_ANON_KEY || "";
 const SUPABASE_TABLE = process.env.SUPABASE_TABLE || "finance_app_state";
 
-if (process.env.VERCEL) {
-  console.log("Executando na Vercel");
-  console.log("SUPABASE_URL configurada:", !!SUPABASE_URL);
-  console.log("SUPABASE_ANON_KEY configurada:", !!process.env.SUPABASE_ANON_KEY);
-  console.log("SUPABASE_SERVICE_ROLE_KEY configurada:", !!SUPABASE_SERVICE_ROLE_KEY);
-}
-
 const MIME_TYPES = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -59,25 +52,52 @@ function loadEnvFile(filePath) {
   }
 }
 
-function sendJson(res, statusCode, payload) {
-  res.writeHead(statusCode, {
-    "Content-Type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": "*",
+const authAttempts = new Map();
+
+function getAllowedOrigins() {
+  return (process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function getSecurityHeaders(req, contentType) {
+  const origin = req?.headers?.origin || "";
+  const allowedOrigins = getAllowedOrigins();
+  const headers = {
+    "Content-Type": contentType,
     "Access-Control-Allow-Methods": "GET,POST,PUT,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
-  });
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Content-Security-Policy":
+      "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' " +
+      (SUPABASE_URL || "https://*.supabase.co"),
+  };
+
+  if (origin && allowedOrigins.includes(origin)) {
+    headers["Access-Control-Allow-Origin"] = origin;
+    headers.Vary = "Origin";
+  }
+
+  return headers;
+}
+
+function sendJson(res, statusCode, payload, req) {
+  res.writeHead(statusCode, getSecurityHeaders(req, "application/json; charset=utf-8"));
   res.end(JSON.stringify(payload));
 }
 
-function sendFile(res, filePath) {
+function sendFile(req, res, filePath) {
   const extension = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[extension] || "application/octet-stream";
   fs.readFile(filePath, (error, content) => {
     if (error) {
-      sendJson(res, 500, { error: "Falha ao ler arquivo." });
+      sendJson(res, 500, { error: "Falha ao ler arquivo." }, req);
       return;
     }
-    res.writeHead(200, { "Content-Type": contentType });
+    res.writeHead(200, getSecurityHeaders(req, contentType));
     res.end(content);
   });
 }
@@ -111,16 +131,23 @@ function getSupabaseHeaders(extra = {}) {
   };
 }
 
-function ensureSupabaseConfigured(res) {
+function ensureSupabaseConfigured(res, req) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SUPABASE_AUTH_KEY) {
-    sendJson(res, 503, {
-      connected: false,
-      error: "Supabase nao configurado no servidor.",
-    });
+    sendJson(
+      res,
+      503,
+      {
+        connected: false,
+        error: "Supabase nao configurado no servidor.",
+      },
+      req
+    );
     return false;
   }
   return true;
 }
+
+
 
 function getBearerToken(req) {
   const header = req.headers.authorization || "";
@@ -220,11 +247,16 @@ async function getAuthenticatedUser(req) {
   }
 }
 
-function sendHandledError(res, error) {
-  sendJson(res, error.statusCode || 500, {
-    connected: true,
-    error: error.message,
-  });
+function sendHandledError(res, error, req) {
+  sendJson(
+    res,
+    error.statusCode || 500,
+    {
+      connected: true,
+      error: error.message,
+    },
+    req
+  );
 }
 
 async function fetchRemoteState(profile) {
@@ -270,35 +302,50 @@ async function saveRemoteState(profile, payload) {
 }
 
 async function handleRequest(req, res) {
-  if (process.env.VERCEL) {
-    console.log("ROOT:", ROOT);
-    console.log("__dirname:", __dirname);
-    console.log("cwd:", process.cwd());
-    console.log("req.url:", req.url);
-  }
-
-  if (!req.url) {
-    sendJson(res, 400, { error: "Requisicao invalida." });
+  if (req.method === "OPTIONS") {
+    sendJson(res, 200, { ok: true }, req);
     return;
   }
 
-  if (req.method === "OPTIONS") {
-    sendJson(res, 200, { ok: true });
+  if (!req.url) {
+    sendJson(res, 400, { error: "Requisicao invalida." }, req);
     return;
   }
 
   const requestUrl = new URL(req.url, `http://localhost:${PORT}`);
 
+  // Rate Limiting for Auth
+  const isAuthRequest =
+    requestUrl.pathname === "/api/auth/login" || requestUrl.pathname === "/api/auth/signup";
+  if (isAuthRequest && req.method === "POST") {
+    const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress || "0.0.0.0";
+    const now = Date.now();
+    const attempts = authAttempts.get(ip) || [];
+    const recentAttempts = attempts.filter((t) => now - t < 60000); // 1 minute window
+
+    if (recentAttempts.length >= 5) {
+      sendJson(res, 429, { error: "Muitas tentativas. Tente novamente em 1 minuto." }, req);
+      return;
+    }
+    recentAttempts.push(now);
+    authAttempts.set(ip, recentAttempts);
+  }
+
   if (requestUrl.pathname === "/api/health" && req.method === "GET") {
-    sendJson(res, 200, {
-      connected: Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY && SUPABASE_AUTH_KEY),
-      table: SUPABASE_TABLE,
-    });
+    sendJson(
+      res,
+      200,
+      {
+        connected: Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY && SUPABASE_AUTH_KEY),
+        table: SUPABASE_TABLE,
+      },
+      req
+    );
     return;
   }
 
   if (requestUrl.pathname === "/api/auth/login" && req.method === "POST") {
-    if (!ensureSupabaseConfigured(res)) {
+    if (!ensureSupabaseConfigured(res, req)) {
       return;
     }
 
@@ -307,7 +354,7 @@ async function handleRequest(req, res) {
       const email = String(body.email || "").trim();
       const password = String(body.password || "");
       if (!email || !password) {
-        sendJson(res, 400, { error: "Informe email e senha." });
+        sendJson(res, 400, { error: "Informe email e senha." }, req);
         return;
       }
 
@@ -315,15 +362,15 @@ async function handleRequest(req, res) {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
-      sendJson(res, 200, { session });
+      sendJson(res, 200, { session }, req);
     } catch (error) {
-      sendHandledError(res, error);
+      sendHandledError(res, error, req);
     }
     return;
   }
 
   if (requestUrl.pathname === "/api/auth/signup" && req.method === "POST") {
-    if (!ensureSupabaseConfigured(res)) {
+    if (!ensureSupabaseConfigured(res, req)) {
       return;
     }
 
@@ -332,7 +379,7 @@ async function handleRequest(req, res) {
       const email = String(body.email || "").trim();
       const password = String(body.password || "");
       if (!email || !password) {
-        sendJson(res, 400, { error: "Informe email e senha." });
+        sendJson(res, 400, { error: "Informe email e senha." }, req);
         return;
       }
 
@@ -349,29 +396,32 @@ async function handleRequest(req, res) {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
-      sendJson(res, 200, { session });
+      sendJson(res, 200, { session }, req);
     } catch (error) {
-      sendHandledError(res, error);
+      sendHandledError(res, error, req);
     }
     return;
   }
 
-  if (requestUrl.pathname === "/api/auth/user" && req.method === "GET") {
-    if (!ensureSupabaseConfigured(res)) {
+  if (
+    (requestUrl.pathname === "/api/auth/me" || requestUrl.pathname === "/api/auth/user") &&
+    req.method === "GET"
+  ) {
+    if (!ensureSupabaseConfigured(res, req)) {
       return;
     }
 
     try {
       const user = await getAuthenticatedUser(req);
-      sendJson(res, 200, { user });
+      sendJson(res, 200, { user }, req);
     } catch (error) {
-      sendHandledError(res, error);
+      sendHandledError(res, error, req);
     }
     return;
   }
 
   if (requestUrl.pathname === "/api/auth/logout" && req.method === "POST") {
-    if (!ensureSupabaseConfigured(res)) {
+    if (!ensureSupabaseConfigured(res, req)) {
       return;
     }
 
@@ -380,15 +430,15 @@ async function handleRequest(req, res) {
       if (accessToken) {
         await requestSupabaseAuth("logout", { method: "POST" }, accessToken);
       }
-      sendJson(res, 200, { ok: true });
+      sendJson(res, 200, { ok: true }, req);
     } catch (error) {
-      sendHandledError(res, error);
+      sendHandledError(res, error, req);
     }
     return;
   }
 
-  if (requestUrl.pathname === "/api/state" && req.method === "GET") {
-    if (!ensureSupabaseConfigured(res)) {
+  if (requestUrl.pathname === "/api/remote/check" && req.method === "GET") {
+    if (!ensureSupabaseConfigured(res, req)) {
       return;
     }
 
@@ -396,15 +446,37 @@ async function handleRequest(req, res) {
       const user = await getAuthenticatedUser(req);
       const profile = getUserProfile(user);
       const data = await fetchRemoteState(profile);
-      sendJson(res, 200, { connected: true, data });
+      sendJson(res, 200, { ok: true, data }, req);
     } catch (error) {
-      sendHandledError(res, error);
+      sendHandledError(res, error, req);
     }
     return;
   }
 
-  if (requestUrl.pathname === "/api/state" && req.method === "PUT") {
-    if (!ensureSupabaseConfigured(res)) {
+  if (
+    (requestUrl.pathname === "/api/remote/pull" || requestUrl.pathname === "/api/state") &&
+    req.method === "GET"
+  ) {
+    if (!ensureSupabaseConfigured(res, req)) {
+      return;
+    }
+
+    try {
+      const user = await getAuthenticatedUser(req);
+      const profile = getUserProfile(user);
+      const data = await fetchRemoteState(profile);
+      sendJson(res, 200, { connected: true, data }, req);
+    } catch (error) {
+      sendHandledError(res, error, req);
+    }
+    return;
+  }
+
+  if (
+    (requestUrl.pathname === "/api/remote/push" && req.method === "POST") ||
+    (requestUrl.pathname === "/api/state" && req.method === "PUT")
+  ) {
+    if (!ensureSupabaseConfigured(res, req)) {
       return;
     }
 
@@ -415,14 +487,14 @@ async function handleRequest(req, res) {
       const payload = body.payload;
 
       if (!payload || typeof payload !== "object") {
-        sendJson(res, 400, { error: "Payload invalido." });
+        sendJson(res, 400, { error: "Payload invalido." }, req);
         return;
       }
 
       const data = await saveRemoteState(profile, payload);
-      sendJson(res, 200, { connected: true, data });
+      sendJson(res, 200, { connected: true, data }, req);
     } catch (error) {
-      sendHandledError(res, error);
+      sendHandledError(res, error, req);
     }
     return;
   }
@@ -434,17 +506,27 @@ async function handleRequest(req, res) {
   const relativePath = staticPath === "/" ? "/index.html" : staticPath;
   const resolvedPath = path.normalize(path.join(ROOT, relativePath));
 
-  if (!resolvedPath.startsWith(ROOT)) {
-    sendJson(res, 403, { error: "Acesso negado." });
+  // Security: Prevent path traversal and restrict allowed files
+  const allowedExtensions = [".html", ".js", ".css", ".svg", ".png", ".jpg", ".jpeg", ".ico", ".webmanifest", ".txt"];
+  const isAllowedFile = allowedExtensions.includes(path.extname(resolvedPath));
+  const isSensitiveFile =
+    resolvedPath.endsWith(".env") ||
+    resolvedPath.endsWith(".env.local") ||
+    resolvedPath.includes("node_modules") ||
+    path.basename(resolvedPath) === "server.js" ||
+    path.basename(resolvedPath) === "request-handler.js";
+
+  if (!resolvedPath.startsWith(ROOT) || !isAllowedFile || isSensitiveFile) {
+    sendJson(res, 403, { error: "Acesso negado." }, req);
     return;
   }
 
   if (!fs.existsSync(resolvedPath) || fs.statSync(resolvedPath).isDirectory()) {
-    sendJson(res, 404, { error: "Arquivo nao encontrado." });
+    sendJson(res, 404, { error: "Arquivo nao encontrado." }, req);
     return;
   }
 
-  sendFile(res, resolvedPath);
+  sendFile(req, res, resolvedPath);
 }
 
 module.exports = {
