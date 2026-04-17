@@ -421,6 +421,38 @@ p {
   margin-bottom: 24px;
 }
 
+.show-more-summary {
+  display: none;
+  width: 100%;
+  padding: 14px;
+  margin: -8px 0 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--primary);
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.show-more-summary:hover {
+  background: var(--primary-soft);
+  transform: translateY(-1px);
+}
+
+.show-more-summary svg {
+  transition: transform 0.3s ease;
+}
+
+.summary-grid.is-expanded + .show-more-summary svg {
+  transform: rotate(180deg);
+}
+
 .charts-grid {
   display: grid !important;
   grid-template-columns: 1fr 1.6fr !important;
@@ -1563,6 +1595,20 @@ th {
     gap: 16px;
     margin-top: 16px;
     padding: 0 12px;
+  }
+
+  .show-more-summary {
+    display: flex;
+  }
+
+  .summary-grid:not(.is-expanded) .summary-tile:nth-child(n+5) {
+    display: none;
+    animation: none;
+  }
+
+  .activity-list .activity-row:nth-child(n+4) {
+    display: none;
+    animation: none;
   }
 
   .auth-gate {

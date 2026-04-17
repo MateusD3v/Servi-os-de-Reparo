@@ -282,6 +282,7 @@ function loadState() {
 let state = loadState();
 
 let summaryCards,
+  toggleSummaryCardsButton,
   monthSelect,
   monthOverview,
   sheetHero,
@@ -323,6 +324,7 @@ let summaryCards,
 
 if (typeof document !== "undefined") {
   summaryCards = document.querySelector("#summary-cards");
+  toggleSummaryCardsButton = document.querySelector("#toggle-summary-cards");
   monthSelect = document.querySelector("#month-select");
   monthOverview = document.querySelector("#month-overview");
   sheetHero = document.querySelector("#sheet-hero");
@@ -1432,15 +1434,15 @@ function activateTab(tabName) {
 function addEntry(type) {
   const base = { id: uid(), description: "", date: "", amount: "" };
   if (type === "income") {
-    state.months[state.selectedMonth].incomes.push(base);
+    state.months[state.selectedMonth].incomes.unshift(base);
   } else if (type === "fixed") {
-    state.months[state.selectedMonth].fixedCosts.push({
+    state.months[state.selectedMonth].fixedCosts.unshift({
       ...base,
       category: CATEGORIES[0],
       paymentMethod: PAYMENT_METHODS[0],
     });
   } else {
-    state.months[state.selectedMonth].expenses.push({
+    state.months[state.selectedMonth].expenses.unshift({
       ...base,
       category: CATEGORIES[0],
       paymentMethod: PAYMENT_METHODS[0],
@@ -1495,7 +1497,7 @@ function updateSettings() {
 }
 
 function addGoal() {
-  state.goals.push({ id: uid(), name: "Nova meta", target: 0 });
+  state.goals.unshift({ id: uid(), name: "Nova meta", target: 0 });
   saveState();
   renderAll();
 }
@@ -1867,6 +1869,17 @@ if (typeof document !== "undefined") {
   if (pushRemoteButton) {
     pushRemoteButton.addEventListener("click", () => {
       pushStateToRemote(false);
+    });
+  }
+
+  if (toggleSummaryCardsButton) {
+    toggleSummaryCardsButton.addEventListener("click", () => {
+      summaryCards.classList.toggle("is-expanded");
+      const isExpanded = summaryCards.classList.contains("is-expanded");
+      const label = toggleSummaryCardsButton.querySelector("span");
+      if (label) {
+        label.textContent = isExpanded ? "Ver menos" : "Ver mais";
+      }
     });
   }
 
