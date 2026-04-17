@@ -195,6 +195,22 @@ function getAuthStorage() {
   return null;
 }
 
+function clearStoredAuthSession(authStorage) {
+  authStorage?.removeItem(AUTH_STORAGE_KEY);
+  if (typeof localStorage !== "undefined" && authStorage !== localStorage) {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+  }
+}
+
+function isAuthSessionExpired(session) {
+  const expiresAt = Number(session?.expires_at || 0);
+  if (!expiresAt) {
+    return false;
+  }
+
+  return expiresAt <= Math.floor(Date.now() / 1000) + 15;
+}
+
 function loadAuthSession() {
   const authStorage = getAuthStorage();
   if (!authStorage) {
@@ -217,14 +233,25 @@ function loadAuthSession() {
 
   try {
     const parsed = JSON.parse(raw);
-    return parsed?.access_token && parsed?.user?.id
-      ? {
-          access_token: parsed.access_token,
-          expires_at: parsed.expires_at,
-          user: parsed.user,
-        }
-      : null;
+    if (!parsed?.access_token || !parsed?.user?.id) {
+      clearStoredAuthSession(authStorage);
+      return null;
+    }
+
+    const session = {
+      access_token: parsed.access_token,
+      expires_at: parsed.expires_at,
+      user: parsed.user,
+    };
+
+    if (isAuthSessionExpired(session)) {
+      clearStoredAuthSession(authStorage);
+      return null;
+    }
+
+    return session;
   } catch {
+    clearStoredAuthSession(authStorage);
     return null;
   }
 }
@@ -502,10 +529,7 @@ function persistAuthSession(session) {
 function clearAuthSession() {
   const authStorage = getAuthStorage();
   authSession = null;
-  authStorage?.removeItem(AUTH_STORAGE_KEY);
-  if (typeof localStorage !== "undefined" && authStorage !== localStorage) {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-  }
+  clearStoredAuthSession(authStorage);
 }
 
 function renderAuthState() {
@@ -1169,7 +1193,7 @@ function renderCalendar(entries) {
 
 function renderEntryList(container, type, entries) {
   if (!entries.length) {
-    container.innerHTML = `<p>Nenhum lançamento neste bloco.</p>`;
+    container.innerHTML = `<p>Nenhum lanÃ§amento neste bloco.</p>`;
     return;
   }
 

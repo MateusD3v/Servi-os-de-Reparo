@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co;"
+      content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net https://*.supabase.co;"
     />
     <title>Financeiro Personalizado</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
@@ -95,7 +95,6 @@
           <section class="tab-panel active" data-panel="painel">
             <section class="sheet-hero" id="sheet-hero"></section>
             <section class="summary-grid ledger-summary" id="summary-cards"></section>
-            
             <section class="charts-grid">
               <article class="chart-card">
                 <div class="sheet-card-header compact">
@@ -153,7 +152,6 @@
                     </div>
                     <div class="activity-list" id="recent-activity"></div>
                   </article>
-
                 </section>
               </div>
 

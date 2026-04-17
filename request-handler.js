@@ -61,6 +61,10 @@ function getAllowedOrigins() {
     .filter(Boolean);
 }
 
+function getConnectSrcDirective() {
+  return ["'self'", "https://cdn.jsdelivr.net", SUPABASE_URL || "https://*.supabase.co"].join(" ");
+}
+
 function getSecurityHeaders(req, contentType) {
   const origin = req?.headers?.origin || "";
   const allowedOrigins = getAllowedOrigins();
@@ -73,8 +77,8 @@ function getSecurityHeaders(req, contentType) {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
     "Content-Security-Policy":
-      "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' " +
-      (SUPABASE_URL || "https://*.supabase.co"),
+      "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src " +
+      getConnectSrcDirective(),
   };
 
   if (contentType.startsWith("application/json")) {
@@ -172,6 +176,30 @@ function getAuthHeaders(accessToken = SUPABASE_AUTH_KEY) {
   };
 }
 
+function formatAuthErrorMessage(rawMessage = "") {
+  if (/email not confirmed/i.test(rawMessage)) {
+    return "Email ainda nao confirmado. Se essa conta foi criada antes da liberacao automatica, apague o usuario no Supabase e cadastre novamente pelo sistema.";
+  }
+
+  if (/invalid login credentials/i.test(rawMessage)) {
+    return "Email ou senha incorretos.";
+  }
+
+  if (/user already registered/i.test(rawMessage)) {
+    return "Ja existe uma conta com este email. Tente entrar.";
+  }
+
+  if (/password should be at least/i.test(rawMessage)) {
+    return "A senha precisa ter pelo menos 6 caracteres.";
+  }
+
+  if (/signup is disabled/i.test(rawMessage)) {
+    return "O cadastro esta desabilitado no momento.";
+  }
+
+  return rawMessage;
+}
+
 async function requestSupabaseAuth(endpoint, options = {}, accessToken) {
   const response = await fetch(`${SUPABASE_URL}/auth/v1/${endpoint}`, {
     ...options,
@@ -194,11 +222,7 @@ async function requestSupabaseAuth(endpoint, options = {}, accessToken) {
       data.msg ||
       data.error ||
       `Supabase Auth falhou com status ${response.status}.`;
-    const error = new Error(
-      /email not confirmed/i.test(rawMessage)
-        ? "Email ainda não confirmado. Se essa conta foi criada antes da liberação automática, apague o usuário no Supabase e cadastre novamente pelo sistema."
-        : rawMessage
-    );
+    const error = new Error(formatAuthErrorMessage(rawMessage));
     error.statusCode = response.status;
     throw error;
   }
