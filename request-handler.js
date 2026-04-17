@@ -51,9 +51,6 @@ function loadEnvFile(filePath) {
     }
   }
 }
-
-const authAttempts = new Map();
-
 function getAllowedOrigins() {
   return (process.env.ALLOWED_ORIGINS || "")
     .split(",")
@@ -342,26 +339,6 @@ async function handleRequest(req, res) {
   }
 
   const requestUrl = new URL(req.url, `http://localhost:${PORT}`);
-
-  // Rate Limiting for Auth
-  const isAuthRequest =
-    requestUrl.pathname === "/api/auth/login" || requestUrl.pathname === "/api/auth/signup";
-  if (isAuthRequest && req.method === "POST") {
-    const ip =
-      String(req.headers["x-forwarded-for"] || req.connection.remoteAddress || "0.0.0.0")
-        .split(",")[0]
-        .trim() || "0.0.0.0";
-    const now = Date.now();
-    const attempts = authAttempts.get(ip) || [];
-    const recentAttempts = attempts.filter((t) => now - t < 60000); // 1 minute window
-
-    if (recentAttempts.length >= 5) {
-      sendJson(res, 429, { error: "Muitas tentativas. Tente novamente em 1 minuto." }, req);
-      return;
-    }
-    recentAttempts.push(now);
-    authAttempts.set(ip, recentAttempts);
-  }
 
   if (requestUrl.pathname === "/api/health" && req.method === "GET") {
     sendJson(
