@@ -230,7 +230,8 @@ button:disabled {
 }
 
 .hero-actions .ghost-button,
-.hero-actions .primary-button {
+.hero-actions .primary-button,
+.hero-actions .icon-button {
   min-height: 48px;
 }
 
@@ -241,6 +242,10 @@ button:disabled {
 
 .hero-actions .icon-button svg {
   color: #ffffff;
+}
+
+.hero.full-screen #toggle-theme {
+  display: none !important;
 }
 
 .hero .top-switcher {
@@ -1696,6 +1701,66 @@ button#push-remote {
   border-radius: var(--radius-lg);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 239, 229, 0.84));
+}
+
+/* Mobile Adjustments for the new layout */
+@media (max-width: 768px) {
+  .hero.full-screen {
+    padding: 4vh 20px;
+  }
+
+  .hero.full-screen h1 {
+    font-size: clamp(2rem, 8vw, 2.8rem);
+    margin-bottom: 12px;
+  }
+
+  .hero.full-screen .hero-copy {
+    font-size: 0.9rem;
+    padding: 0 10px;
+  }
+
+  .hero.full-screen .hero-actions {
+    top: 15px;
+    right: 15px;
+  }
+
+  .auth-gate {
+    padding: 20px;
+    padding-top: 45vh; /* Aumentado significativamente para garantir que abaixe no mobile */
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    z-index: 30;
+    pointer-events: none;
+    margin-top: 0;
+  }
+
+  .auth-card {
+    grid-template-columns: 1fr;
+    padding: 20px;
+    gap: 16px;
+    min-height: auto;
+    margin-top: 25vh; /* Ajustado para 25vh conforme solicitado */
+  }
+
+  .auth-card p:not(.section-kicker) {
+    display: none;
+  }
+
+  .auth-card .section-kicker {
+    margin-bottom: 4px;
+  }
+
+  .auth-card h2 {
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+
+  .auth-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 .stack-list {
