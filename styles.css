@@ -81,6 +81,7 @@ body {
     linear-gradient(180deg, var(--paper) 0%, var(--bg) 35%);
   transition: background 0.4s ease, color 0.4s ease;
   overflow-x: hidden;
+  position: relative;
 }
 
 button,
@@ -120,6 +121,48 @@ button:disabled {
   color: #f8fbff;
   position: relative;
   overflow: hidden;
+  transition: min-height 0.5s ease;
+}
+
+.hero.full-screen {
+  min-height: 100vh;
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 5vh;
+  text-align: center;
+}
+
+.hero.full-screen > div:first-child {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 800px;
+  z-index: 10;
+}
+
+.hero.full-screen h1 {
+  max-width: 100%;
+  margin-bottom: 24px;
+}
+
+.hero.full-screen .hero-copy {
+  max-width: 60ch;
+  margin-bottom: 0;
+}
+
+.hero.full-screen .hero-actions {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
 }
 
 .hero::before {
@@ -249,33 +292,42 @@ p {
 
 .auth-gate {
   display: grid;
+  place-items: center;
   padding: 32px;
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
 }
 
 .auth-card {
+  pointer-events: auto;
+  max-width: 900px;
   width: 100%;
   min-height: 429px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.82fr);
   gap: 28px;
   align-items: center;
-  padding: 28px;
+  padding: 42px;
   border-radius: var(--radius-xl);
-  border: 1px solid var(--line);
-  background: var(--card);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(24px);
+  color: #fff;
 }
 
 .auth-card h2 {
   margin-bottom: 10px;
   font-size: clamp(28px, 4vw, 44px);
   line-height: 1;
+  color: #fff;
 }
 
 .auth-card p {
   margin-bottom: 0;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.7);
   font-weight: 700;
   line-height: 1.6;
 }
@@ -283,7 +335,6 @@ p {
 .auth-form {
   display: grid;
   gap: 14px;
-  height: 162px;
 }
 
 .auth-form label {
@@ -291,7 +342,7 @@ p {
   flex-direction: column;
   font-size: 0.75rem;
   font-weight: 800;
-  color: var(--primary);
+  color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   gap: 6px;
@@ -319,6 +370,35 @@ p {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+
+/* Restoring original look for the auth buttons specifically */
+.auth-form .primary-button[data-auth-action="login"] {
+  background-color: #ecd448 !important;
+  color: #131313 !important;
+  box-shadow: 2.5px 3px 0 #000 !important;
+  border: 2px solid #000 !important;
+  opacity: 1 !important;
+}
+
+.auth-form .primary-button[data-auth-action="login"]:hover {
+  background-color: #4cc9f0 !important;
+  color: #fff !important;
+  box-shadow: 4px 5px 0 #0d3b66 !important;
+}
+
+.auth-form .ghost-button[data-auth-action="signup"] {
+  background: var(--paper) !important;
+  color: var(--primary) !important;
+  border: 2px solid var(--primary) !important;
+  box-shadow: 2.5px 3px 0 var(--primary) !important;
+  opacity: 1 !important;
+}
+
+.auth-form .ghost-button[data-auth-action="signup"]:hover {
+  background: var(--primary-soft) !important;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 5px 0 var(--primary) !important;
 }
 
 .auth-status {
@@ -1447,6 +1527,127 @@ button#push-remote {
 [data-theme="dark"] .category-limits-panel,
 [data-theme="dark"] .metric-chip,
 [data-theme="dark"] .calendar-cell,
+[data-theme="dark"] .breakdown-row,
+[data-theme="dark"] .activity-row,
+[data-theme="dark"] .goal-strip,
+[data-theme="dark"] .sheet-status-block {
+  background: rgba(30, 41, 59, 0.82);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+/* Custom Select - Adapted from Uiverse.io by 3bdel3ziz-T */
+.custom-select {
+  width: 100%;
+  cursor: pointer;
+  position: relative;
+  transition: 300ms;
+  color: var(--ink);
+  overflow: visible;
+  margin-top: 8px;
+}
+
+.custom-select .selected {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  position: relative;
+  z-index: 10;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+}
+
+.custom-select:hover .selected {
+  border-color: rgba(47, 93, 140, 0.42);
+  box-shadow: 0 0 0 4px rgba(47, 93, 140, 0.1);
+}
+
+.custom-select .arrow {
+  height: 10px;
+  width: 25px;
+  fill: var(--ink);
+  transition: 300ms;
+  transform: rotate(0deg);
+  opacity: 0.6;
+}
+
+.custom-select .options {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-md);
+  padding: 6px;
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: 300ms;
+  z-index: 100;
+  margin-top: 6px;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(12px);
+}
+
+.custom-select.is-open .options {
+  opacity: 1;
+  visibility: visible;
+}
+
+.custom-select.is-open .arrow {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+.custom-select .option {
+  border-radius: 8px;
+  padding: 10px 12px;
+  transition: 200ms;
+  background-color: transparent;
+  width: 100%;
+  font-size: 15px;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.custom-select .option:hover {
+  background-color: var(--primary-soft);
+  color: var(--primary-strong);
+}
+
+.custom-select .options input[type="radio"] {
+  display: none;
+}
+
+.custom-select .options label {
+  display: block;
+}
+
+/* Logic for displaying the selected text using :has() and pseudo-elements */
+.custom-select:has(#affect-true:checked) .selected::before {
+  content: "Sim";
+}
+.custom-select:has(#affect-false:checked) .selected::before {
+  content: "Não";
+}
+
+[data-theme="dark"] .custom-select .selected,
+[data-theme="dark"] .custom-select .options {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+[data-theme="dark"] .custom-select .option:hover {
+  background: var(--primary-soft);
+}
 [data-theme="dark"] .calendar-event,
 [data-theme="dark"] .breakdown-row,
 [data-theme="dark"] .activity-row,

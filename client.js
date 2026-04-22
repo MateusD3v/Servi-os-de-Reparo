@@ -536,11 +536,13 @@ function clearAuthSession() {
 
 function renderAuthState() {
   const isAuthenticated = Boolean(authSession?.access_token && authSession?.user?.id);
+  const hero = document.querySelector(".hero");
 
   authGate?.classList.toggle("is-hidden", isAuthenticated);
   appShell?.classList.toggle("is-hidden", !isAuthenticated);
   authUser?.classList.toggle("is-hidden", !isAuthenticated);
   heroActions?.classList.toggle("login-only-actions", !isAuthenticated);
+  hero?.classList.toggle("full-screen", !isAuthenticated);
   document.querySelectorAll(".requires-auth").forEach((element) => {
     element.classList.toggle("is-hidden", !isAuthenticated);
   });
@@ -853,9 +855,13 @@ function renderSettings() {
   document.querySelector("#active-year").value = state.settings.activeYear;
   document.querySelector("#initial-balance").value = state.settings.initialBalance;
   document.querySelector("#headline-goal").value = state.settings.headlineGoal;
-  document.querySelector("#investments-affect-balance").value = String(
-    state.settings.investmentsAffectBalance
-  );
+
+  const radioTrue = document.querySelector("#affect-true");
+  const radioFalse = document.querySelector("#affect-false");
+  if (radioTrue && radioFalse) {
+    radioTrue.checked = state.settings.investmentsAffectBalance === true;
+    radioFalse.checked = state.settings.investmentsAffectBalance === false;
+  }
   if (categoryLimitsGrid) {
     categoryLimitsGrid.innerHTML = CATEGORIES.map(
       (category) => `
@@ -1588,8 +1594,10 @@ function updateSettings() {
   state.settings.activeYear = Number(document.querySelector("#active-year").value || new Date().getFullYear());
   state.settings.initialBalance = Number(document.querySelector("#initial-balance").value || 0);
   state.settings.headlineGoal = document.querySelector("#headline-goal").value;
-  state.settings.investmentsAffectBalance =
-    document.querySelector("#investments-affect-balance").value === "true";
+
+  const radioTrue = document.querySelector("#affect-true");
+  state.settings.investmentsAffectBalance = radioTrue ? radioTrue.checked : true;
+
   state.settings.categoryLimits = {
     ...defaultCategoryLimits(),
     ...state.settings.categoryLimits,
@@ -1773,6 +1781,32 @@ document.body.addEventListener("click", (event) => {
   const deleteGoalId = event.target.dataset.deleteGoal;
   if (deleteGoalId) {
     deleteGoal(deleteGoalId);
+    return;
+  }
+
+  // Lógica para o Custom Select
+  const customSelect = event.target.closest(".custom-select");
+  const allCustomSelects = document.querySelectorAll(".custom-select");
+
+  if (customSelect) {
+    const isSelectedPart = event.target.closest(".selected");
+    const isOption = event.target.closest(".option");
+
+    if (isSelectedPart) {
+      // Toggle ao clicar na parte visível
+      customSelect.classList.toggle("is-open");
+    } else if (isOption) {
+      // Fecha ao selecionar uma opção
+      customSelect.classList.remove("is-open");
+    }
+
+    // Fecha outros selects abertos
+    allCustomSelects.forEach((s) => {
+      if (s !== customSelect) s.classList.remove("is-open");
+    });
+  } else {
+    // Fecha todos se clicar fora
+    allCustomSelects.forEach((s) => s.classList.remove("is-open"));
   }
 });
 
