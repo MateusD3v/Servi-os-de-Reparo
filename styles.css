@@ -1524,6 +1524,10 @@ button#push-remote {
   color: rgba(148, 163, 184, 0.7);
 }
 
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 [data-theme="dark"] .sheet-calendar-card,
 [data-theme="dark"] .sheet-sidebar-card,
 [data-theme="dark"] .insight-card,
