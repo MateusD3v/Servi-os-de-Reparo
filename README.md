@@ -2,6 +2,18 @@
 
 Este projeto transforma uma planilha de controle financeiro em um sistema web local com painel visual, organizacao mensal, login por usuario e sincronizacao com Supabase.
 
+## Estrutura do projeto
+
+- `index.html`, `styles.css` e `client.js`: interface do painel financeiro.
+- `server.js`: ponto de entrada do servidor local.
+- `request-handler.js`: fachada HTTP compartilhada pelo servidor local e pelas rotas da Vercel.
+- `src/server/config.js`: leitura de ambiente e configuracoes centrais.
+- `src/server/http.js`: helpers de resposta, headers de seguranca e leitura de payload.
+- `src/server/api-router.js`: roteamento das APIs de auth, saude e estado remoto.
+- `src/server/supabase.js`: comunicacao com Supabase Auth e REST.
+- `src/server/static-files.js`: entrega segura de arquivos publicos.
+- `api/`: adaptadores pequenos usados em deploy serverless.
+
 ## O que o sistema cobre
 
 - configuracao inicial do controle

@@ -322,47 +322,90 @@ let summaryCards,
   pushRemoteButton,
   remoteStatus;
 
-if (typeof document !== "undefined") {
-  summaryCards = document.querySelector("#summary-cards");
-  toggleSummaryCardsButton = document.querySelector("#toggle-summary-cards");
-  monthSelect = document.querySelector("#month-select");
-  monthOverview = document.querySelector("#month-overview");
-  sheetHero = document.querySelector("#sheet-hero");
-  calendarNote = document.querySelector("#calendar-note");
-  calendarGrid = document.querySelector("#calendar-grid");
-  paymentBreakdown = document.querySelector("#payment-breakdown");
-  categoryBreakdown = document.querySelector("#category-breakdown");
-  recentActivity = document.querySelector("#recent-activity");
-  goalSnapshot = document.querySelector("#goal-snapshot");
-  incomeList = document.querySelector("#income-list");
-  fixedList = document.querySelector("#fixed-list");
-  expenseList = document.querySelector("#expense-list");
-  goalsGrid = document.querySelector("#goals-grid");
-  annualTableBody = document.querySelector("#annual-table-body");
-  settingsForm = document.querySelector("#settings-form");
-  seedDemoButton = document.querySelector("#seed-demo");
-  importExcelButton = document.querySelector("#import-excel");
-  resetButton = document.querySelector("#reset-data");
-  addGoalButton = document.querySelector("#add-goal");
-  tabButtons = document.querySelectorAll(".tab-button");
-  tabPanels = document.querySelectorAll(".tab-panel");
-  authGate = document.querySelector("#auth-gate");
-  appShell = document.querySelector("#app-shell");
-  authForm = document.querySelector("#auth-form");
-  authEmailInput = document.querySelector("#auth-email");
-  authPasswordInput = document.querySelector("#auth-password");
-  authStatus = document.querySelector("#auth-status");
-  authUser = document.querySelector("#auth-user");
-  authUserEmail = document.querySelector("#auth-user-email");
-  logoutButton = document.querySelector("#logout-button");
-  heroActions = document.querySelector("#hero-actions");
-  categoryLimitsGrid = document.querySelector("#category-limits-grid");
-  supabaseProfileInput = document.querySelector("#supabase-profile");
-  supabaseAutoSyncInput = document.querySelector("#supabase-auto-sync");
-  checkRemoteButton = document.querySelector("#check-remote");
-  pullRemoteButton = document.querySelector("#pull-remote");
-  pushRemoteButton = document.querySelector("#push-remote");
-  remoteStatus = document.querySelector("#remote-status");
+const DOM_SELECTORS = {
+  summaryCards: "#summary-cards",
+  toggleSummaryCardsButton: "#toggle-summary-cards",
+  monthSelect: "#month-select",
+  monthOverview: "#month-overview",
+  sheetHero: "#sheet-hero",
+  calendarNote: "#calendar-note",
+  calendarGrid: "#calendar-grid",
+  paymentBreakdown: "#payment-breakdown",
+  categoryBreakdown: "#category-breakdown",
+  recentActivity: "#recent-activity",
+  goalSnapshot: "#goal-snapshot",
+  incomeList: "#income-list",
+  fixedList: "#fixed-list",
+  expenseList: "#expense-list",
+  goalsGrid: "#goals-grid",
+  annualTableBody: "#annual-table-body",
+  settingsForm: "#settings-form",
+  seedDemoButton: "#seed-demo",
+  importExcelButton: "#import-excel",
+  resetButton: "#reset-data",
+  addGoalButton: "#add-goal",
+  tabButtons: ".tab-button",
+  tabPanels: ".tab-panel",
+  authGate: "#auth-gate",
+  appShell: "#app-shell",
+  authForm: "#auth-form",
+  authEmailInput: "#auth-email",
+  authPasswordInput: "#auth-password",
+  authStatus: "#auth-status",
+  authUser: "#auth-user",
+  authUserEmail: "#auth-user-email",
+  logoutButton: "#logout-button",
+  heroActions: "#hero-actions",
+  categoryLimitsGrid: "#category-limits-grid",
+  supabaseProfileInput: "#supabase-profile",
+  supabaseAutoSyncInput: "#supabase-auto-sync",
+  checkRemoteButton: "#check-remote",
+  pullRemoteButton: "#pull-remote",
+  pushRemoteButton: "#push-remote",
+  remoteStatus: "#remote-status",
+};
+
+function cacheDomElements() {
+  summaryCards = document.querySelector(DOM_SELECTORS.summaryCards);
+  toggleSummaryCardsButton = document.querySelector(DOM_SELECTORS.toggleSummaryCardsButton);
+  monthSelect = document.querySelector(DOM_SELECTORS.monthSelect);
+  monthOverview = document.querySelector(DOM_SELECTORS.monthOverview);
+  sheetHero = document.querySelector(DOM_SELECTORS.sheetHero);
+  calendarNote = document.querySelector(DOM_SELECTORS.calendarNote);
+  calendarGrid = document.querySelector(DOM_SELECTORS.calendarGrid);
+  paymentBreakdown = document.querySelector(DOM_SELECTORS.paymentBreakdown);
+  categoryBreakdown = document.querySelector(DOM_SELECTORS.categoryBreakdown);
+  recentActivity = document.querySelector(DOM_SELECTORS.recentActivity);
+  goalSnapshot = document.querySelector(DOM_SELECTORS.goalSnapshot);
+  incomeList = document.querySelector(DOM_SELECTORS.incomeList);
+  fixedList = document.querySelector(DOM_SELECTORS.fixedList);
+  expenseList = document.querySelector(DOM_SELECTORS.expenseList);
+  goalsGrid = document.querySelector(DOM_SELECTORS.goalsGrid);
+  annualTableBody = document.querySelector(DOM_SELECTORS.annualTableBody);
+  settingsForm = document.querySelector(DOM_SELECTORS.settingsForm);
+  seedDemoButton = document.querySelector(DOM_SELECTORS.seedDemoButton);
+  importExcelButton = document.querySelector(DOM_SELECTORS.importExcelButton);
+  resetButton = document.querySelector(DOM_SELECTORS.resetButton);
+  addGoalButton = document.querySelector(DOM_SELECTORS.addGoalButton);
+  tabButtons = document.querySelectorAll(DOM_SELECTORS.tabButtons);
+  tabPanels = document.querySelectorAll(DOM_SELECTORS.tabPanels);
+  authGate = document.querySelector(DOM_SELECTORS.authGate);
+  appShell = document.querySelector(DOM_SELECTORS.appShell);
+  authForm = document.querySelector(DOM_SELECTORS.authForm);
+  authEmailInput = document.querySelector(DOM_SELECTORS.authEmailInput);
+  authPasswordInput = document.querySelector(DOM_SELECTORS.authPasswordInput);
+  authStatus = document.querySelector(DOM_SELECTORS.authStatus);
+  authUser = document.querySelector(DOM_SELECTORS.authUser);
+  authUserEmail = document.querySelector(DOM_SELECTORS.authUserEmail);
+  logoutButton = document.querySelector(DOM_SELECTORS.logoutButton);
+  heroActions = document.querySelector(DOM_SELECTORS.heroActions);
+  categoryLimitsGrid = document.querySelector(DOM_SELECTORS.categoryLimitsGrid);
+  supabaseProfileInput = document.querySelector(DOM_SELECTORS.supabaseProfileInput);
+  supabaseAutoSyncInput = document.querySelector(DOM_SELECTORS.supabaseAutoSyncInput);
+  checkRemoteButton = document.querySelector(DOM_SELECTORS.checkRemoteButton);
+  pullRemoteButton = document.querySelector(DOM_SELECTORS.pullRemoteButton);
+  pushRemoteButton = document.querySelector(DOM_SELECTORS.pushRemoteButton);
+  remoteStatus = document.querySelector(DOM_SELECTORS.remoteStatus);
 }
 
 let categoryChart = null;
@@ -1751,15 +1794,13 @@ function seedDemoData() {
   renderAll();
 }
 
-monthSelect.addEventListener("change", (event) => {
+function handleMonthChange(event) {
   state.selectedMonth = event.target.value;
   saveState();
   renderAll();
-});
+}
 
-settingsForm.addEventListener("input", updateSettings);
-
-document.body.addEventListener("click", (event) => {
+function handleBodyClick(event) {
   const tabName = event.target.dataset.tab;
   if (tabName) {
     activateTab(tabName);
@@ -1808,9 +1849,9 @@ document.body.addEventListener("click", (event) => {
     // Fecha todos se clicar fora
     allCustomSelects.forEach((s) => s.classList.remove("is-open"));
   }
-});
+}
 
-document.body.addEventListener("input", (event) => {
+function handleBodyInput(event) {
   const entryRow = event.target.closest(".entry-row");
   if (entryRow && event.target.dataset.field) {
     updateEntry(entryRow.dataset.type, entryRow.dataset.id, event.target.dataset.field, event.target.value);
@@ -1827,15 +1868,15 @@ document.body.addEventListener("input", (event) => {
   if (goalInvestmentId) {
     updateInvestment(goalInvestmentId, event.target.value);
   }
-});
+}
 
-document.body.addEventListener("change", (event) => {
+function handleBodyChange(event) {
   const goalCard = event.target.closest(".goal-card");
   if (goalCard && (event.target.dataset.goalField || event.target.dataset.goalInvestment)) {
     renderGoals();
     renderDashboard();
   }
-});
+}
 
 async function importFromExcel() {
   if (typeof XLSX === "undefined") {
@@ -1972,13 +2013,19 @@ async function importFromExcel() {
   input.click();
 }
 
-if (typeof document !== "undefined") {
-  authForm.addEventListener("submit", (event) => {
+function bindAppEvents() {
+  monthSelect?.addEventListener("change", handleMonthChange);
+  settingsForm?.addEventListener("input", updateSettings);
+  document.body.addEventListener("click", handleBodyClick);
+  document.body.addEventListener("input", handleBodyInput);
+  document.body.addEventListener("change", handleBodyChange);
+
+  authForm?.addEventListener("submit", (event) => {
     event.preventDefault();
     submitAuth(event.submitter?.dataset.authAction || "login");
   });
 
-  logoutButton.addEventListener("click", async () => {
+  logoutButton?.addEventListener("click", async () => {
     try {
       await apiRequest("/api/auth/logout", { method: "POST" });
     } catch {
@@ -1994,13 +2041,13 @@ if (typeof document !== "undefined") {
   if (seedDemoButton) {
     seedDemoButton.addEventListener("click", seedDemoData);
   }
-  importExcelButton.addEventListener("click", importFromExcel);
-  resetButton.addEventListener("click", () => {
+  importExcelButton?.addEventListener("click", importFromExcel);
+  resetButton?.addEventListener("click", () => {
     state = createDefaultState();
     saveState();
     renderAll();
   });
-  addGoalButton.addEventListener("click", addGoal);
+  addGoalButton?.addEventListener("click", addGoal);
   if (checkRemoteButton) {
     checkRemoteButton.addEventListener("click", () => {
       checkRemoteConnection(true);
@@ -2027,7 +2074,9 @@ if (typeof document !== "undefined") {
       }
     });
   }
+}
 
+function initializeTheme() {
   const toggleThemeButton = document.querySelector("#toggle-theme");
 
   if (toggleThemeButton) {
@@ -2045,9 +2094,19 @@ if (typeof document !== "undefined") {
   if (savedTheme) {
     document.documentElement.setAttribute("data-theme", savedTheme);
   }
+}
+
+function bootApp() {
+  cacheDomElements();
+  bindAppEvents();
+  initializeTheme();
 
   restoreAuthSession();
   if (remoteStatus) {
     checkRemoteConnection(false);
   }
+}
+
+if (typeof document !== "undefined") {
+  bootApp();
 }

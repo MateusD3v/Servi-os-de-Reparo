@@ -2172,6 +2172,12 @@ th {
     gap: 10px;
   }
 
+  #add-goal {
+    order: -1;
+    align-self: flex-end;
+    margin-bottom: -20px;
+  }
+
   .table-wrap {
     margin: 0;
     padding: 0 12px;
